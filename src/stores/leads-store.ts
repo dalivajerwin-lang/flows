@@ -131,7 +131,17 @@ async function checkNameProjectDuplicate(
 
 // -------- Selectors (hooks) --------
 
-export function useVisibleLeads(opts: { includeTrash?: boolean } = {}): Lead[] {
+export interface VisibleLeadsResult {
+  leads: Lead[];
+  /** True while the underlying leads query has not yet produced data. */
+  isLoading: boolean;
+  /** True when the fetch failed — show an error state, NOT an empty CRM. */
+  isError: boolean;
+  error: Error | null;
+  refetch: () => void;
+}
+
+export function useVisibleLeads(opts: { includeTrash?: boolean } = {}): VisibleLeadsResult {
   const userId = useAuth((s) => s.userId);
   const { data: profiles = [] } = useProfiles();
   const me = profiles.find((p) => p.id === userId) ?? null;
@@ -141,22 +151,34 @@ export function useVisibleLeads(opts: { includeTrash?: boolean } = {}): Lead[] {
   const isConsultant = me?.role === "property_consultant";
   const assignedToFilter = isConsultant && me ? me.id : undefined;
 
-  const { data: leads = [] } = useLeads(
-    assignedToFilter ? { assignedTo: assignedToFilter } : undefined,
-  );
+  const activeQuery = useLeads(assignedToFilter ? { assignedTo: assignedToFilter } : undefined);
 
   // Always subscribe to trashed leads so the hook call count stays constant
   // (React rules — hooks must never be called conditionally).
-  const { data: trashedLeads = [] } = useTrashedLeads();
+  const trashedQuery = useTrashedLeads();
 
-  if (!me) return [];
+  const query = opts.includeTrash ? trashedQuery : activeQuery;
+  const status = {
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: (query.error as Error) ?? null,
+    refetch: () => query.refetch(),
+  };
+
+  if (!me) return { leads: [], ...status };
 
   if (!opts.includeTrash) {
-    return leads.filter((l) => l.deleted_at == null);
+    const leads = activeQuery.data ?? [];
+    return { leads: leads.filter((l) => l.deleted_at == null), ...status };
   } else {
     // Trash view: managers/superadmins see all trashed leads (RLS enforced).
     // Consultants see only their own trashed leads.
-    return isConsultant && me ? trashedLeads.filter((l) => l.assigned_to === me.id) : trashedLeads;
+    const trashedLeads = trashedQuery.data ?? [];
+    return {
+      leads:
+        isConsultant && me ? trashedLeads.filter((l) => l.assigned_to === me.id) : trashedLeads,
+      ...status,
+    };
   }
 }
 
@@ -726,6 +748,6 @@ export function filterAndSortLeads(
 }
 
 export function useFilterableLeads(includeTrash = false): Lead[] {
-  const leads = useVisibleLeads({ includeTrash });
+  const { leads } = useVisibleLeads({ includeTrash });
   return leads;
 }

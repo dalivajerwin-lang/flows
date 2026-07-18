@@ -21,9 +21,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireAuth } from "@/lib/route-guards";
 import { initials } from "@/lib/format";
 
 export const Route = createFileRoute("/profile")({
+  beforeLoad: requireAuth,
   head: () => ({ meta: [{ title: "My Profile — Tenacious CRM" }] }),
   component: ProfilePage,
   errorComponent: RouteErrorBoundary,

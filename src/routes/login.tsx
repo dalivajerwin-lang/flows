@@ -4,10 +4,11 @@ import { toast } from "sonner";
 import { useAuth } from "@/stores/auth-store";
 import { Button } from "@/components/ui/tenacious-button";
 import { Field, TenaciousInput } from "@/components/ui/form-controls";
-import { DownloadAppButton } from "@/components/pwa/download-app-button";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { redirectIfAuthed } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: redirectIfAuthed,
   head: () => ({ meta: [{ title: "Sign in — Tenacious CRM" }] }),
   component: LoginPage,
   errorComponent: RouteErrorBoundary,
@@ -112,8 +113,6 @@ function LoginPage() {
             </Button>
           </div>
         </form>
-
-        <DownloadAppButton />
       </div>
     </div>
   );

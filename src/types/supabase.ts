@@ -763,57 +763,6 @@ export interface Database {
         };
         Relationships: [];
       };
-      offline_outbox: {
-        Row: {
-          id: string;
-          user_id: string;
-          lead_id: string;
-          action_kind: "update" | "note";
-          payload: Json;
-          base_version: number;
-          queued_at: string;
-          synced_at: string | null;
-          conflict: boolean;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          lead_id: string;
-          action_kind: "update" | "note";
-          payload: Json;
-          base_version: number;
-          queued_at?: string;
-          synced_at?: string | null;
-          conflict?: boolean;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          lead_id?: string;
-          action_kind?: "update" | "note";
-          payload?: Json;
-          base_version?: number;
-          queued_at?: string;
-          synced_at?: string | null;
-          conflict?: boolean;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "offline_outbox_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedSchema: "auth";
-          },
-          {
-            foreignKeyName: "offline_outbox_lead_id_fkey";
-            columns: ["lead_id"];
-            isOneToOne: false;
-            referencedRelation: "leads";
-            referencedSchema: "public";
-          },
-        ];
-      };
       registration_tokens: {
         Row: {
           id: string;

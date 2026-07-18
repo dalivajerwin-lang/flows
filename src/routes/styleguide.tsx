@@ -20,8 +20,10 @@ import { toast } from "sonner";
 import { STAGES } from "@/lib/constants";
 
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireAuth } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/styleguide")({
+  beforeLoad: requireAuth,
   head: () => ({ meta: [{ title: "Styleguide — Tenacious CRM" }] }),
   component: Styleguide,
   errorComponent: RouteErrorBoundary,

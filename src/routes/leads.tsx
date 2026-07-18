@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect, useState } from "react";
 import { createFileRoute, useSearch, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState, ErrorState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "lucide-react";
@@ -22,6 +22,7 @@ import { RestoreConflictModal } from "@/components/leads/restore-conflict-modal"
 import { toast } from "sonner";
 
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireAuth } from "@/lib/route-guards";
 
 const searchSchema = z.object({
   lead: z.string().optional(),
@@ -32,6 +33,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/leads")({
+  beforeLoad: requireAuth,
   head: () => ({ meta: [{ title: "Leads — Tenacious CRM" }] }),
   validateSearch: searchSchema,
   component: LeadsPage,
@@ -64,9 +66,10 @@ function LeadsPage() {
   }, [search.stage, search.assigned]);
 
   const trashView = ui.stageChips.has("trash");
-  const activeLeads = useVisibleLeads({ includeTrash: false });
-  const trashedLeads = useVisibleLeads({ includeTrash: true });
-  const source = trashView ? trashedLeads : activeLeads;
+  const activeResult = useVisibleLeads({ includeTrash: false });
+  const trashedResult = useVisibleLeads({ includeTrash: true });
+  const sourceResult = trashView ? trashedResult : activeResult;
+  const source = sourceResult.leads;
 
   const { data: projects = [] } = useProjects();
   const projectsById = useMemo(
@@ -131,7 +134,18 @@ function LeadsPage() {
         Showing {visible.length} of {totalForCount} leads
       </div>
 
-      {visible.length === 0 ? (
+      {sourceResult.isError ? (
+        <ErrorState
+          message="Couldn't load leads. Check your connection and try again."
+          onRetry={sourceResult.refetch}
+        />
+      ) : sourceResult.isLoading ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-14 w-full" />
+        </div>
+      ) : visible.length === 0 ? (
         <EmptyStateForContext
           hasFilterActive={hasFilterActive}
           isManager={isManager}

@@ -13,8 +13,9 @@ import { BottomNav } from "./bottom-nav";
 import { FabMenu } from "./fab-menu";
 import { SplashScreen } from "./splash-screen";
 import { NotificationToaster } from "./notification-toaster";
+import { NetworkBanner } from "./network-banner";
+import { PushPermissionPrompt } from "./push-permission-prompt";
 import { BroadcastOverlay } from "@/components/broadcast/broadcast-overlay";
-import { PwaRoot } from "@/components/pwa/pwa-root";
 import { bottomNavFor, managerOnlyPaths, sidebarFor } from "./nav-config";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,24 @@ export function AppShell({ children }: { children: ReactNode }) {
     // One-time cleanup: the legacy local mock DB is gone — purge its stale data.
     window.localStorage.removeItem("tenacious.db.v4");
     window.localStorage.removeItem("tenacious.db.v4_corrupt");
+    // One-time cleanup: the app is online-only now. Unregister any previously
+    // installed service worker, delete its caches, and purge offline-queue
+    // localStorage so no stale authenticated data survives on the device.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((regs) => regs.forEach((r) => r.unregister()))
+        .catch(() => {});
+    }
+    if ("caches" in window) {
+      window.caches
+        .keys()
+        .then((keys) => keys.forEach((k) => window.caches.delete(k)))
+        .catch(() => {});
+    }
+    window.localStorage.removeItem("tenacious.offline.queue.v1");
+    window.localStorage.removeItem("tenacious.offline.conflicts.v1");
+    window.localStorage.removeItem("tenacious.offline.forced.v1");
     const warm = window.sessionStorage.getItem("tenacious.warm");
     if (!warm) {
       setShowSplash(true);
@@ -117,6 +136,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-(--color-background)">
+      <NetworkBanner />
       <Sidebar
         items={sidebarItems}
         unreadCount={unreadCount}
@@ -145,7 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <FabMenu open={fabOpen} onOpenChange={setFabOpen} role={profile.role} />
       <NotificationToaster />
       <BroadcastOverlay />
-      <PwaRoot />
+      <PushPermissionPrompt />
     </div>
   );
 }

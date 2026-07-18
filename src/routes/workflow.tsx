@@ -48,10 +48,14 @@ import { cn } from "@/lib/utils";
 import { weekDays, todayKeyManila, manilaDateTimeToIso } from "@/lib/schedule-time";
 
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireAuth } from "@/lib/route-guards";
+import { ErrorState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const searchSchema = z.object({ lead: z.string().optional() });
 
 export const Route = createFileRoute("/workflow")({
+  beforeLoad: requireAuth,
   head: () => ({ meta: [{ title: "Workflow — Tenacious CRM" }] }),
   validateSearch: searchSchema,
   component: WorkflowPage,
@@ -66,7 +70,12 @@ function WorkflowPage() {
   const isManager = isManagerish(profile?.role ?? null);
   const search = useSearch({ from: "/workflow" });
   const navigate = useNavigate();
-  const leads = useVisibleLeads();
+  const {
+    leads,
+    isLoading: leadsLoading,
+    isError: leadsError,
+    refetch: refetchLeads,
+  } = useVisibleLeads();
   const ui = usePipelineUI();
   const { data: profiles = [] } = useProfiles();
   const consultants = profiles.filter((p) => p.role === "property_consultant");
@@ -204,26 +213,39 @@ function WorkflowPage() {
       )}
 
       {/* Board */}
-      <div
-        ref={scrollerRef}
-        onScroll={onScrollerScroll}
-        className={cn(
-          "flex gap-3 overflow-x-auto pb-2",
-          isMobile ? "snap-x snap-mandatory scroll-smooth" : "",
-          "2xl:grid 2xl:grid-cols-5 2xl:gap-4 2xl:overflow-x-visible",
-        )}
-        data-testid="workflow-board"
-      >
-        {BOARD_STAGES.map((stage) => (
-          <Column
-            key={stage}
-            stage={stage}
-            leads={grouped[stage] ?? []}
-            isMobile={isMobile}
-            onOpen={openLead}
-          />
-        ))}
-      </div>
+      {leadsError ? (
+        <ErrorState
+          message="Pipeline couldn't load. Check your connection."
+          onRetry={refetchLeads}
+        />
+      ) : leadsLoading ? (
+        <div className="flex gap-3 overflow-x-hidden pb-2">
+          {BOARD_STAGES.map((stage) => (
+            <Skeleton key={stage} className="h-64 w-full min-w-[220px]" />
+          ))}
+        </div>
+      ) : (
+        <div
+          ref={scrollerRef}
+          onScroll={onScrollerScroll}
+          className={cn(
+            "flex gap-3 overflow-x-auto pb-2",
+            isMobile ? "snap-x snap-mandatory scroll-smooth" : "",
+            "2xl:grid 2xl:grid-cols-5 2xl:gap-4 2xl:overflow-x-visible",
+          )}
+          data-testid="workflow-board"
+        >
+          {BOARD_STAGES.map((stage) => (
+            <Column
+              key={stage}
+              stage={stage}
+              leads={grouped[stage] ?? []}
+              isMobile={isMobile}
+              onOpen={openLead}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Pagination dots (mobile only) */}
       {isMobile && (

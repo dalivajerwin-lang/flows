@@ -22,7 +22,7 @@ export function EntityPopover({ type, id, anchorRect, onDismiss }: Props) {
   const profile = useCurrentProfile();
   const isManager = isManagerish(profile?.role ?? null);
   const navigate = useNavigate();
-  const realLeads = useVisibleLeads();
+  const { leads: realLeads } = useVisibleLeads();
   const { data: profiles = [] } = useProfiles();
   const { data: projects = [] } = useProjects();
   const ref = useRef<HTMLDivElement>(null);

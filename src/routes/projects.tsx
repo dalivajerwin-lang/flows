@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { EmptyState } from "@/components/ui/empty-state";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireAuth } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/projects")({
+  beforeLoad: requireAuth,
   head: () => ({ meta: [{ title: "Projects Computation — Tenacious CRM" }] }),
   component: () => (
     <div>

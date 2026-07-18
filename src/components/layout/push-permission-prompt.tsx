@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { Bell, X } from "lucide-react";
 import { useAuth } from "@/stores/auth-store";
-import { isIOSSafari, isStandalone } from "@/lib/pwa/env";
 
-const SEEN_KEY_PREFIX = "tenacious.pwa.push-prompt-seen.";
+const SEEN_KEY_PREFIX = "tenacious.push-prompt-seen.";
 
 /**
  * Soft pre-prompt shown once after first login. Only the "Enable" tap triggers
  * the native permission dialog. Denials are respected — never re-prompt.
- *
- * iOS gate: if iOS Safari and not installed, replaces the CTA with an
- * instruction to Add to Home Screen first.
+ * Backs the in-app desktop notifications fired by lib/notify.ts.
  */
 export function PushPermissionPrompt() {
   const userId = useAuth((s) => s.userId);
@@ -44,7 +41,6 @@ export function PushPermissionPrompt() {
   };
 
   if (!visible) return null;
-  const iosGated = isIOSSafari() && !isStandalone();
 
   return (
     <div
@@ -57,31 +53,23 @@ export function PushPermissionPrompt() {
         <Bell size={18} />
       </div>
       <div className="min-w-0 flex-1">
-        {iosGated ? (
-          <p className="text-sm text-[var(--color-text)]">
-            Add this app to your Home Screen to enable push notifications on iOS.
-          </p>
-        ) : (
-          <p className="text-sm text-[var(--color-text)]">
-            Get alerts for expiring reservations and new assignments even when the app is closed.
-          </p>
-        )}
-        {!iosGated && (
-          <div className="mt-2 flex gap-2">
-            <button
-              onClick={enable}
-              className="rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--color-primary-hover)]"
-            >
-              Enable Notifications
-            </button>
-            <button
-              onClick={dismiss}
-              className="rounded-[var(--radius-sm)] border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--color-surface)]"
-            >
-              Not now
-            </button>
-          </div>
-        )}
+        <p className="text-sm text-[var(--color-text)]">
+          Get alerts for expiring reservations and new assignments while the app is open.
+        </p>
+        <div className="mt-2 flex gap-2">
+          <button
+            onClick={enable}
+            className="rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--color-primary-hover)]"
+          >
+            Enable Notifications
+          </button>
+          <button
+            onClick={dismiss}
+            className="rounded-[var(--radius-sm)] border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--color-surface)]"
+          >
+            Not now
+          </button>
+        </div>
       </div>
       <button
         onClick={dismiss}

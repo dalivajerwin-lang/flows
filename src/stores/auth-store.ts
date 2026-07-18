@@ -1,8 +1,30 @@
 import { create } from "zustand";
 import { supabase, db } from "@/lib/supabase";
+import { queryClient } from "@/lib/query-client";
+import { useAssistantStore } from "./assistant-store";
 import type { Database } from "@/types/supabase";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+/**
+ * Purge all user-specific client state. Called on every sign-out (explicit
+ * logout AND the SIGNED_OUT auth event, e.g. session expiry) so no CRM data
+ * or chat history survives on a shared computer.
+ */
+function clearUserData() {
+  // In-memory CRM data (leads, notes, profiles, reports...).
+  queryClient.clear();
+  // Assistant chat history & personal todos are persisted per-user in
+  // localStorage — wipe both the live state and the persisted copy.
+  useAssistantStore.setState({ messages: {}, todos: {} });
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem("tenacious:assistant");
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 interface AuthState {
   userId: string | null;
@@ -56,35 +78,50 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   login: async (agentNumberOrEmail, password, remember) => {
-    let email = agentNumberOrEmail.trim();
+    const identifier = agentNumberOrEmail.trim();
+    let authUserId: string | null = null;
 
-    // If it looks like an agent number (no @), resolve it to an email address.
-    if (!email.includes("@")) {
-      const { data, error } = await db.rpc("resolve_agent_login_email", {
-        p_agent_number: email,
+    if (identifier.includes("@")) {
+      // Email login: straight password sign-in.
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: identifier,
+        password,
+      });
+      if (authError) {
+        return { ok: false, error: authError.message };
+      }
+      authUserId = authData.user.id;
+    } else {
+      // Agent-number login: resolved server-side by the agent-login Edge
+      // Function (rate-limited; never exposes the email), which returns
+      // session tokens we adopt locally.
+      const { data, error } = await supabase.functions.invoke<{
+        access_token?: string;
+        refresh_token?: string;
+        error?: string;
+      }>("agent-login", {
+        body: { agent_number: identifier, password },
       });
 
-      if (error || !data) {
+      if (error || data?.error || !data?.access_token || !data?.refresh_token) {
+        return { ok: false, error: data?.error || "Invalid agent number or password." };
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+      });
+      if (sessionError || !sessionData.user) {
         return { ok: false, error: "Invalid agent number or password." };
       }
-      email = data as string;
-    }
-
-    // Perform Supabase email/password login.
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (authError) {
-      return { ok: false, error: authError.message };
+      authUserId = sessionData.user.id;
     }
 
     // Update last login timestamp in public profiles.
     const { data: profile } = await db
       .from("profiles")
       .update({ last_login_at: new Date().toISOString() })
-      .eq("id", authData.user.id)
+      .eq("id", authUserId)
       .select()
       .maybeSingle();
     const typedProfile = profile as Profile | null;
@@ -93,7 +130,7 @@ export const useAuth = create<AuthState>((set, get) => ({
       return { ok: false, error: "Profile record not found." };
     }
 
-    set({ userId: authData.user.id, profile: typedProfile, rememberMe: remember });
+    set({ userId: authUserId, profile: typedProfile, rememberMe: remember });
     return { ok: true, profile: typedProfile };
   },
 
@@ -102,6 +139,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     // When rememberMe is false, clear only the local session (no server-side
     // revocation). When true (default), use a full global sign-out.
     await supabase.auth.signOut(rememberMe ? undefined : { scope: "local" });
+    clearUserData();
     set({ userId: null, profile: null, rememberMe: false });
   },
 }));
@@ -113,6 +151,7 @@ function _setupListener(set: (partial: Partial<AuthState>) => void, get: () => A
 
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === "SIGNED_OUT") {
+      clearUserData();
       set({ userId: null, profile: null });
       return;
     }

@@ -10,7 +10,7 @@ This CRM is a **web application** accessible via a browser on any device (mobile
 - **Secondary target**: Desktop/laptop browsers — the desktop experience is fully specified in the **Responsive Layout & Desktop Design Specification** section and must never be an unspecified stretch of the mobile layout.
 - **No app store installation required**: Users access the CRM directly via a URL.
 - **Browser compatibility**: Must work on Chrome, Safari, and other modern browsers.
-- **PWA support** (recommended): The web app should be installable as a Progressive Web App on mobile browsers so users can add it to their home screen for quick access.
+- **Online-only**: The CRM requires an active internet connection. There is no PWA install flow, no service worker, no offline caching, and no offline queue. All data is always fetched fresh from the server; network failures surface clear error messages instead of stale or queued data.
 
 ## Lead Workflow
 
@@ -485,14 +485,7 @@ This means:
 - **No horizontal scrolling**: Every screen must display fully within the device viewport width without requiring users to scroll sideways.
 - **Tablet layout**: On tablets, the layout may expand to a two-column view where useful (e.g., lead list on the left, detail view on the right), but must never sacrifice usability for aesthetics.
 - **Fast loading**: All screens should load quickly on mobile data connections (3G/LTE), with lazy loading for images and pagination for long lists.
-- **Offline tolerance & Conflict Resolution**: The system should gracefully handle poor connectivity by queuing updates in local storage and syncing when connection is restored. To resolve write conflicts (e.g., an agent makes updates offline while a manager transfers ownership online), Supabase must enforce **Optimistic Locking** using a `version` or `updated_at` column. If a sync conflict occurs:
-  - The system rejects the offline update.
-  - A notification warns the offline agent of the conflict.
-  - Instead of saving rejected changes as unstructured text notes (which are hard to parse and reconcile), the app must capture the rejected updates in a local "Conflicted" state and display a side-by-side visual diff tool.
-  - The agent must be prompted to resolve the conflict by selecting one of the following resolution flows:
-    1. **Force Overwrite** (only if the user has Manager/Superadmin permissions).
-    2. **Discard Local Changes** (revert local state to match the current server version).
-    3. **Field-by-Field Merge** (manually select which fields from the offline update to keep vs. which fields to overwrite with server values).
+- **Concurrency & Conflict Prevention**: The app is online-only — writes go straight to Supabase. To prevent lost updates when two users edit the same lead concurrently (e.g., an agent edits while a manager transfers ownership), Supabase must enforce **Optimistic Locking** using a `version` column: every update includes a `.eq("version", currentVersion)` guard, and a version mismatch rejects the write. On rejection the app refetches the fresh server state and tells the user their change was not saved so they can re-apply it against the current data.
 
 ### UI/UX Usability Guidelines
 
@@ -693,7 +686,7 @@ Only the five radius tokens exist: `--radius-sm: 8px`, `--radius-md: 12px`, `--r
 
 ### Splash Screen / App Preloader
 
-To give the app a native, polished feel on launch (especially when installed as a PWA to the home screen), a **1.5-second splash screen** is shown on every cold start.
+To give the app a native, polished feel on launch, a **1.5-second splash screen** is shown on every cold start.
 
 - **Display**: Full-screen background using the app's sidebar dark color (`#111827` — the same token as the Attio-signature dark sidebar). Centered app logo/wordmark fades in at `opacity 0 → 1` over `400ms`.
 - **Progress indicator**: A thin **1px horizontal progress bar** at the bottom of the screen fills from left to right over the 1.5 seconds using a CSS linear animation. Color: primary brand teal (`#069494`).
@@ -1259,14 +1252,14 @@ When a new notification arrives **while the user is actively inside the app**, a
 - Tapping the toast navigates directly to the relevant lead or approval screen.
 - If multiple notifications arrive within 4 seconds of each other, they queue and display one after another.
 
-### Layer 3: 📲 Browser Push Notification (PWA)
+### Layer 3: 📲 Browser Notification
 
-Since the system supports **PWA (Progressive Web App)** and can be installed to the home screen, it can fire an **OS-level push notification** even when the app is minimized or the screen is off.
+While the app is open in a browser tab (foreground or background tab), it can fire a **browser-level notification** via the Notification API.
 
-- Appears in the phone's notification tray like any native app notification.
+- Appears in the OS notification tray while the browser is running.
 - Shows the same summary text as the toast banner.
-- Tapping the push notification **deep-links** the user directly into the relevant screen (lead detail, reversion inbox, broadcast, etc.) without needing to navigate manually.
-- Users are prompted to enable push notifications on first launch. If denied, Layers 1 and 2 remain active.
+- Tapping the notification **deep-links** the user directly into the relevant screen (lead detail, reversion inbox, broadcast, etc.) without needing to navigate manually.
+- Users are prompted to enable notifications on first login. If denied, Layers 1 and 2 remain active.
 
 ### Notification Priority Matrix
 
@@ -2080,7 +2073,7 @@ CREATE TABLE leads (
 **Notes**:
 
 - `phone_normalized` and `facebook_url_canonical` have `UNIQUE` constraints powering Tier 1 and Tier 2 duplicate detection.
-- `version` is incremented on every `UPDATE`. Offline sync conflicts are detected by comparing the client's cached `version` against the server value before committing.
+- `version` is incremented on every `UPDATE`. Concurrent-edit conflicts are prevented by comparing the client's cached `version` against the server value in the update's `WHERE` clause (optimistic locking).
 - `deleted_at` implements the 30-day Trash Bin soft-delete. Supabase scheduled function hard-deletes rows where `deleted_at < NOW() - INTERVAL '30 days'`.
 - `crf_expires_at` is set once on first entry into the `crf` stage and never reset to prevent deadline avoidance.
 
@@ -2303,7 +2296,7 @@ CREATE TABLE notifications (
 **Notes**:
 
 - `layers` JSONB controls which of the three delivery layers fire per the Notification Priority Matrix.
-- `deep_link_path` is used by PWA push notifications to open the exact correct screen.
+- `deep_link_path` is used by browser notifications to open the exact correct screen.
 
 ---
 
@@ -2413,7 +2406,7 @@ CREATE TABLE system_settings (
   -- Timezone
   company_timezone          VARCHAR(60) NOT NULL DEFAULT 'Asia/Manila',  -- IANA timezone string
 
-  -- PWA / App Identity
+  -- App Identity
   app_name                  VARCHAR(100) NOT NULL DEFAULT 'Team Tenacious CRM',
   app_short_name            VARCHAR(30)  NOT NULL DEFAULT 'Tenacious',
   app_theme_color           VARCHAR(7)   NOT NULL DEFAULT '#069494',   -- Hex; matches primary teal
@@ -2432,7 +2425,7 @@ CREATE TABLE system_settings (
 - This table must always contain exactly **one row** seeded at bootstrap time.
 - `registration_locked` is toggled by the Manager from the Team Page and by the Superadmin from the Admin Dashboard.
 - `company_timezone` is used by all date comparisons for Weekly/Monthly filters, leaderboard cutoffs, and scheduled archiving.
-- The PWA fields (`app_name`, `app_short_name`, `app_theme_color`, `app_background_color`) directly populate the generated `manifest.json` at build time.
+- The app identity fields (`app_name`, `app_short_name`, `app_theme_color`, `app_background_color`) populate the page title, theme-color meta tag, and splash screen branding.
 
 ---
 
@@ -2832,82 +2825,14 @@ Every screen that fetches data must have a defined error state so developers nev
 | **Stage Transition (save failure)** | _"Stage update failed. Your changes were not saved. Please retry."_      |
 | **Broadcast send failure**          | _"Broadcast couldn't be sent. Check your connection and try again."_     |
 
-### Offline Behavior
+### Network Loss Behavior (Online-Only)
 
-- When the device loses network connectivity, a **persistent slim banner** appears at the top of the screen: `📡 You're offline — changes will sync when reconnected.` (Amber background, dark text).
-- The banner auto-dismisses when connectivity is restored and sync completes.
-- Read operations (viewing lead details, browsing the workflow board) should still work using cached data from the last successful load.
-- Write operations (stage changes, adding notes) are queued in the offline store and synced on reconnection, subject to the Optimistic Locking conflict resolution flow defined in the Design Approach section.
+The CRM is **online-only** — nothing is cached or queued for offline use.
 
----
-
-## PWA Technical Specification
-
-The application must be installable as a **Progressive Web App (PWA)** on Android and iOS home screens. The following implementation requirements must be met.
-
-### `manifest.json` Required Fields
-
-```json
-{
-  "name": "Team Tenacious CRM",
-  "short_name": "Tenacious",
-  "description": "CRM for Team Tenacious — manage leads, pipeline, and team performance.",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#069494",
-  "background_color": "#111827",
-  "icons": [
-    { "src": "/public/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/public/assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    {
-      "src": "/public/assets/icon-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ]
-}
-```
-
-### Service Worker Caching Strategy
-
-| Asset Type                                                   | Caching Strategy           | Notes                                                            |
-| :----------------------------------------------------------- | :------------------------- | :--------------------------------------------------------------- |
-| **App shell** (HTML, CSS, JS bundles)                        | **Cache First**            | Served from cache instantly; updated in background on next visit |
-| **API / store data** (lead lists, dashboard)                 | **Network First**          | Fetches fresh data; falls back to cached version if offline      |
-| **Static media** (profile photos, project computation files) | **Stale While Revalidate** | Show cached image immediately; fetch update silently             |
-| **Auth tokens / session**                                    | **Never cached**           | Always validated live against Supabase Auth                      |
-
-### Push Notifications (Web Push API)
-
-- The app registers a **service worker** and requests push notification permission on first login.
-- Push messages are delivered via the **Web Push API** using VAPID (Voluntary Application Server Identification) keys stored as environment variables on Netlify.
-- **VAPID keys** must be generated once per deployment and stored in:
-  - `VITE_VAPID_PUBLIC_KEY` — injected into the frontend bundle.
-  - `VAPID_PRIVATE_KEY` — stored only on the Netlify server/function, never in the frontend.
-- **iOS note**: PWA push notifications on iOS require Safari 16.4+ and the user must first install the app to their Home Screen before push permission is requestable. The app must detect this state and display a prompt: _"Add this app to your Home Screen to enable push notifications on iOS."_
-- **Permission Denied Fallback**: If push permission is denied, Layers 1 (badge counter) and 2 (in-app toast) remain fully functional as defined in the Notification Delivery System section.
-
-### `netlify.toml` Required Configuration
-
-```toml
-[[redirects]]
-  from = "/*"
-  to   = "/index.html"
-  status = 200
-
-[[headers]]
-  for = "/manifest.json"
-  [headers.values]
-    Content-Type = "application/manifest+json"
-    Cache-Control = "public, max-age=86400"
-
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "no-cache"
-```
+- When the device loses network connectivity, a **persistent slim banner** appears at the top of the screen: `No internet connection — Tenacious CRM requires a connection. Changes cannot be saved until you're back online.` (Error-red background, white text).
+- The banner auto-dismisses when connectivity is restored.
+- Read and write operations that fail due to network loss surface the per-screen error messages defined above — never a silent failure, and never stale cached data presented as current.
+- No service worker is registered, no Cache Storage is used, and no authenticated data is persisted for offline access.
 
 ---
 

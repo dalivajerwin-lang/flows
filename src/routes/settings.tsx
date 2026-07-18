@@ -26,9 +26,11 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireAuth } from "@/lib/route-guards";
 import { ShieldAlert, KeyRound, Settings, Building, Plus, Pencil, Save, X } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
+  beforeLoad: requireAuth,
   head: () => ({ meta: [{ title: "Settings — Tenacious CRM" }] }),
   component: SettingsPage,
   errorComponent: RouteErrorBoundary,

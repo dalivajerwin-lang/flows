@@ -34,7 +34,10 @@ serve(async (req) => {
     let finalDisplayName = display_name;
     let finalAgentNumber = agent_number;
 
-    // 1. If token is provided, validate and fetch intended profile details from database
+    // 1. Authorize the request. Two allowed paths:
+    //    a) A valid single-use registration token (role comes from the token).
+    //    b) No token: the caller's JWT must resolve to an active
+    //       manager/superadmin profile (direct admin invite).
     if (token) {
       const { data: tokenData, error: tokenError } = await adminClient
         .from("registration_tokens")
@@ -54,6 +57,48 @@ serve(async (req) => {
       finalRole = tokenData.intended_role;
       finalDisplayName = tokenData.intended_display_name;
       finalAgentNumber = tokenData.intended_agent_number;
+    } else {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      const jwt = authHeader.replace(/^Bearer\s+/i, "");
+      if (!jwt) {
+        return new Response(JSON.stringify({ error: "Not authorized." }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: callerData, error: callerError } = await adminClient.auth.getUser(jwt);
+      if (callerError || !callerData?.user) {
+        return new Response(JSON.stringify({ error: "Not authorized." }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: callerProfile } = await adminClient
+        .from("profiles")
+        .select("role, is_active")
+        .eq("id", callerData.user.id)
+        .maybeSingle();
+
+      if (
+        !callerProfile ||
+        !callerProfile.is_active ||
+        !["manager", "superadmin"].includes(callerProfile.role)
+      ) {
+        return new Response(JSON.stringify({ error: "Not authorized." }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Direct invites can never mint a superadmin.
+      if (!["manager", "property_consultant"].includes(finalRole)) {
+        return new Response(JSON.stringify({ error: "Invalid role." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     if (!email || !finalRole || !finalDisplayName || !finalAgentNumber) {

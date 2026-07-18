@@ -64,7 +64,7 @@ export function ChatCanvas() {
       return count ?? 0;
     },
   });
-  const realLeads = useVisibleLeads();
+  const { leads: realLeads } = useVisibleLeads();
   const { data: realProfiles = [] } = useProfiles();
   const { data: realProjects = [] } = useProjects();
   const messagesMap = useAssistantStore((s) => s.messages);

@@ -70,7 +70,7 @@ export function ChatWidget({ widget, messageId, state }: Props) {
 
 function LeadSuggestions({ leadIds }: { leadIds: string[] }) {
   const profile = useCurrentProfile();
-  const realLeads = useVisibleLeads();
+  const { leads: realLeads } = useVisibleLeads();
   const { data: projects = [] } = useProjects();
   const leads = getAssistantVisibleLeads({ leads: realLeads, profile }).filter((lead) =>
     leadIds.includes(lead.id),
@@ -115,7 +115,7 @@ function InlineTransition({
   step: WidgetStepState["step"];
 }) {
   const profile = useCurrentProfile();
-  const realLeads = useVisibleLeads();
+  const { leads: realLeads } = useVisibleLeads();
   const lead = getAssistantVisibleLeads({ leads: realLeads, profile }).find((l) => l.id === leadId);
   if (!lead) return <div className="text-xs text-[var(--color-danger-solid)]">Lead not found.</div>;
   const reasonId = `wf-reason-${messageId}`;

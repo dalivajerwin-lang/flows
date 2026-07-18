@@ -19,11 +19,14 @@ function SetupPage() {
   const [checking, setChecking] = useState(true);
   const [alreadySetup, setAlreadySetup] = useState(false);
 
-  // Check whether any profiles already exist — if yes, redirect to /login
+  // Server-side check whether setup is still available — if not, redirect to /login.
+  // (An anon count over profiles always returns 0 under RLS, so we ask a
+  // SECURITY DEFINER RPC instead. This is informational only — the real gate
+  // is enforced inside bootstrap_superadmin.)
   useEffect(() => {
     async function check() {
-      const { count } = await db.from("profiles").select("id", { count: "exact", head: true });
-      if ((count ?? 0) > 0) {
+      const { data: available, error } = await db.rpc("setup_available");
+      if (error || available !== true) {
         setAlreadySetup(true);
         navigate({ to: "/login" });
       }
@@ -72,22 +75,23 @@ function SetupPage() {
       const userId = signUpData.user?.id;
       if (!userId) throw new Error("Failed to create user account.");
 
-      // 2. Create the superadmin profile
-      const { error: profileError } = await db.from("profiles").insert({
-        id: userId,
-        display_name: displayName.trim(),
-        agent_number: agentNumber.trim(),
-        role: "superadmin",
-        is_active: true,
-      });
-      if (profileError) throw new Error(profileError.message);
-
-      // 3. Sign in immediately
+      // 2. Sign in so the bootstrap RPC runs as this user
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
       if (signInError) throw new Error(signInError.message);
+
+      // 3. Create the superadmin profile server-side. The RPC pins the
+      //    role and only succeeds if no profile exists yet.
+      const { error: bootstrapError } = await db.rpc("bootstrap_superadmin", {
+        p_display_name: displayName.trim(),
+        p_agent_number: agentNumber.trim(),
+      });
+      if (bootstrapError) {
+        await supabase.auth.signOut();
+        throw new Error(bootstrapError.message);
+      }
 
       toast.success("Superadmin account created! Welcome to Tenacious CRM.");
       navigate({ to: "/" });

@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
+import { requireManager } from "@/lib/route-guards";
 import {
   Copy,
   Plus,
@@ -38,6 +39,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/team")({
+  beforeLoad: requireManager,
   head: () => ({ meta: [{ title: "Team Management — Tenacious CRM" }] }),
   component: TeamPage,
   errorComponent: RouteErrorBoundary,
