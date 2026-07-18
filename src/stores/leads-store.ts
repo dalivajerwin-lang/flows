@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./auth-store";
 import { normalizePhone } from "@/lib/phone";
 import { extractFacebookCanonicalId } from "@/lib/facebook";
-import { uploadAndGetSignedUrl } from "@/lib/storage-helper";
+import { uploadAvatarImage } from "@/lib/storage-helper";
 import type { LeadSource, UnitType } from "@/lib/lead-sources";
 import type { Stage } from "@/lib/constants";
 import type { Database } from "@/types/supabase";
@@ -519,7 +519,7 @@ export async function setLeadPhoto(id: string, photo: File | string | null): Pro
 
   let finalUrl: string | null = null;
   if (photo instanceof File) {
-    finalUrl = await uploadAndGetSignedUrl("profile-photos", "leads", photo);
+    finalUrl = await uploadAvatarImage("leads", photo);
   } else {
     finalUrl = photo;
   }

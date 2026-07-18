@@ -235,7 +235,9 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
 
   function handlePhoto(file: File | null) {
     if (!file) return;
-    setLeadPhoto(leadId, file);
+    setLeadPhoto(leadId, file).catch((err) => {
+      toast.error(err instanceof Error ? err.message : "Failed to upload photo.");
+    });
   }
 
   return (
@@ -264,7 +266,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
           </div>
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             className="absolute inset-0 cursor-pointer opacity-0"
             onChange={(e) => handlePhoto(e.target.files?.[0] ?? null)}
           />

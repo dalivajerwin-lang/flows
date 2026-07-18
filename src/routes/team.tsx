@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
 import { requireManager } from "@/lib/route-guards";
+import { isManagerish } from "@/hooks/use-role";
 import {
   Copy,
   Plus,
@@ -138,6 +139,10 @@ function TeamPage() {
     return matchesSearch && matchesRole;
   });
 
+  const inviteButtonLabel = isManagerish(currentProfile?.role ?? null)
+    ? "Invite"
+    : "Invite Consultant";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -157,7 +162,7 @@ function TeamPage() {
           className="flex items-center gap-2 self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" />
-          Invite Consultant
+          {inviteButtonLabel}
         </Button>
       </div>
 
@@ -319,7 +324,7 @@ function TeamPage() {
                         colSpan={6}
                         className="h-24 text-center text-sm text-[var(--color-text-secondary)]"
                       >
-                        No invitations found. Use "Invite Consultant" to invite.
+                        No invitations found. Use "{inviteButtonLabel}" to invite.
                       </TableCell>
                     </TableRow>
                   ) : (

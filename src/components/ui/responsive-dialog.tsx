@@ -24,11 +24,16 @@ export function ResponsiveDialog({
 }) {
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const panelRef = React.useRef<HTMLDivElement>(null);
+  // Keep the latest callback in a ref so the effect below only re-runs when
+  // `open` changes — inline onOpenChange props otherwise re-trigger it on every
+  // parent render (e.g. the 1s ticker), stealing focus from inputs mid-typing.
+  const onOpenChangeRef = React.useRef(onOpenChange);
+  onOpenChangeRef.current = onOpenChange;
 
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
+      if (e.key === "Escape") onOpenChangeRef.current(false);
     };
     window.addEventListener("keydown", onKey);
     // simple focus trap: focus panel on open
@@ -38,7 +43,7 @@ export function ResponsiveDialog({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [open, onOpenChange]);
+  }, [open]);
 
   if (!open) return null;
 

@@ -66,7 +66,7 @@ function initFor(a: Appointment | null): FormState {
     };
   }
   return {
-    appointment_type: "client_tripping",
+    appointment_type: "manning_duty",
     consultant_id: "",
     consultant_ids: [],
     lead_id: "",
@@ -110,12 +110,22 @@ export function AppointmentFormDialog({
       .sort((a, b) => a.full_name.localeCompare(b.full_name));
   }, [allLeads, state.consultant_id]);
   const isClient = isClientAppointment(state.appointment_type);
+  // Managers can no longer create client trippings/presentations for a
+  // consultant — those are booked by the consultant from the lead workflow.
+  // The dialog only offers client types when editing an existing client
+  // appointment; new appointments are manning/booth duty only.
+  const editingClient = !!editing && isClientAppointment(editing.appointment_type);
+  const typeOptions = editingClient ? CLIENT_APPOINTMENT_TYPES : PUBLIC_APPOINTMENT_TYPES;
 
   if (!profile) return null;
   const isManager = profile.role !== "property_consultant";
   if (!isManager) return null;
 
   const save = async () => {
+    if (isClient && !editing) {
+      toast.error("Client trippings and presentations are booked from the lead's workflow.");
+      return;
+    }
     const isMultiAgent = !isClient && !editing;
     const targetAgents = isMultiAgent ? state.consultant_ids : [state.consultant_id];
 
@@ -211,18 +221,7 @@ export function AppointmentFormDialog({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <div className="px-2 pt-1.5 pb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-                Client
-              </div>
-              {CLIENT_APPOINTMENT_TYPES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {APPOINTMENT_TYPE_LABELS[t]}
-                </SelectItem>
-              ))}
-              <div className="mt-1 px-2 pt-1.5 pb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-                Public
-              </div>
-              {PUBLIC_APPOINTMENT_TYPES.map((t) => (
+              {typeOptions.map((t) => (
                 <SelectItem key={t} value={t}>
                   {APPOINTMENT_TYPE_LABELS[t]}
                 </SelectItem>

@@ -33,7 +33,7 @@ export function ReversionInboxPanel() {
   return (
     <PanelCard
       icon={<Inbox size={16} className="text-[var(--color-primary)]" />}
-      title="Stage Reversion Request Inbox"
+      title="Stage Reversal Requests"
       badge={
         pending.length > 0 ? (
           <span className="rounded-full bg-[var(--color-danger-solid)] px-2 text-xs font-semibold text-white">

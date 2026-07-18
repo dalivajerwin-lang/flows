@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
-import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -38,11 +37,6 @@ const TeamRoute = TeamRouteImport.update({
 const StyleguideRoute = StyleguideRouteImport.update({
   id: '/styleguide',
   path: '/styleguide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SetupRoute = SetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -113,7 +107,6 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/schedule': typeof ScheduleRoute
   '/settings': typeof SettingsRoute
-  '/setup': typeof SetupRoute
   '/styleguide': typeof StyleguideRoute
   '/team': typeof TeamRoute
   '/workflow': typeof WorkflowRoute
@@ -130,7 +123,6 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/schedule': typeof ScheduleRoute
   '/settings': typeof SettingsRoute
-  '/setup': typeof SetupRoute
   '/styleguide': typeof StyleguideRoute
   '/team': typeof TeamRoute
   '/workflow': typeof WorkflowRoute
@@ -148,7 +140,6 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/schedule': typeof ScheduleRoute
   '/settings': typeof SettingsRoute
-  '/setup': typeof SetupRoute
   '/styleguide': typeof StyleguideRoute
   '/team': typeof TeamRoute
   '/workflow': typeof WorkflowRoute
@@ -167,7 +158,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/schedule'
     | '/settings'
-    | '/setup'
     | '/styleguide'
     | '/team'
     | '/workflow'
@@ -184,7 +174,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/schedule'
     | '/settings'
-    | '/setup'
     | '/styleguide'
     | '/team'
     | '/workflow'
@@ -201,7 +190,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/schedule'
     | '/settings'
-    | '/setup'
     | '/styleguide'
     | '/team'
     | '/workflow'
@@ -219,7 +207,6 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   ScheduleRoute: typeof ScheduleRoute
   SettingsRoute: typeof SettingsRoute
-  SetupRoute: typeof SetupRoute
   StyleguideRoute: typeof StyleguideRoute
   TeamRoute: typeof TeamRoute
   WorkflowRoute: typeof WorkflowRoute
@@ -246,13 +233,6 @@ declare module '@tanstack/react-router' {
       path: '/styleguide'
       fullPath: '/styleguide'
       preLoaderRoute: typeof StyleguideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/setup': {
-      id: '/setup'
-      path: '/setup'
-      fullPath: '/setup'
-      preLoaderRoute: typeof SetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -347,7 +327,6 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   ScheduleRoute: ScheduleRoute,
   SettingsRoute: SettingsRoute,
-  SetupRoute: SetupRoute,
   StyleguideRoute: StyleguideRoute,
   TeamRoute: TeamRoute,
   WorkflowRoute: WorkflowRoute,

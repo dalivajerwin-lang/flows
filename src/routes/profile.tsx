@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { db } from "@/lib/supabase";
-import { uploadAndGetSignedUrl } from "@/lib/storage-helper";
+import { uploadAvatarImage } from "@/lib/storage-helper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,7 +61,7 @@ function ProfilePage() {
     if (!file) return;
     setUploading(true);
     try {
-      const signedUrl = await uploadAndGetSignedUrl("profile-photos", "avatars", file);
+      const signedUrl = await uploadAvatarImage("avatars", file);
 
       // Save to database
       const { data: updatedProfile, error } = await db
@@ -153,7 +153,7 @@ function ProfilePage() {
                 )}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   disabled={uploading}
                   className="absolute inset-0 cursor-pointer opacity-0"
                   onChange={(e) => handlePhotoUpload(e.target.files?.[0] ?? null)}

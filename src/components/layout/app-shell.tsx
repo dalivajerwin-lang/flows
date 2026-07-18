@@ -118,14 +118,26 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [hydrated, profile, path, navigate]);
 
-  // Before hydration completes on the client, render only children to match SSR output exactly.
-  if (!mounted) return <>{children}</>;
+  // Before hydration completes on the client, render nothing for protected
+  // paths (their content must never flash unauthenticated — the SSR pass and
+  // first client paint both land here). Public routes render as-is to match
+  // SSR output exactly.
+  if (!mounted || (!isPublic && !hydrated)) {
+    return isPublic ? <>{children}</> : <AuthGate />;
+  }
 
   if (showSplash) return <SplashScreen />;
 
   // Public routes render standalone.
-  if (isPublic || !profile) {
+  if (isPublic) {
     return <>{children}</>;
+  }
+
+  // Hydration finished with no session/profile on a protected path: the
+  // redirect effect above is about to navigate to /login — show the gate,
+  // never the protected content.
+  if (!profile) {
+    return <AuthGate />;
   }
 
   const unreadCount = notifications.filter((n) => n.user_id === profile.id && !n.is_read).length;
@@ -166,6 +178,19 @@ export function AppShell({ children }: { children: ReactNode }) {
       <NotificationToaster />
       <BroadcastOverlay />
       <PushPermissionPrompt />
+    </div>
+  );
+}
+
+/**
+ * Neutral full-screen placeholder shown on protected paths while auth state
+ * is unknown (SSR pass / pre-hydration) or absent (redirecting to /login).
+ * Deliberately renders no route content so nothing leaks unauthenticated.
+ */
+function AuthGate() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface)]">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
     </div>
   );
 }
