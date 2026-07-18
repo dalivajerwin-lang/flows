@@ -256,8 +256,24 @@ export function ChatCanvas() {
         replyText = `✅ Added to your todo list: "${intent.text}".`;
         break;
       case "command_call": {
-        window.location.href = `tel:${authorizedLeads.find((l) => l.id === intent.leadId)?.contact_number ?? ""}`;
-        replyText = `📞 Calling ${intent.leadName} — logged a call activity on their record.`;
+        const lead = authorizedLeads.find((l) => l.id === intent.leadId);
+        if (!lead?.contact_number) {
+          replyText = `${intent.leadName} has no contact number on record.`;
+          break;
+        }
+        window.location.href = `tel:${lead.contact_number}`;
+        // Actually log the call on the lead's record — same table the schedule
+        // and pipeline flows write activities to.
+        const { error: callErr } = await supa.from("audit_trail").insert({
+          lead_id: lead.id,
+          actor_id: profile.id,
+          type: "call_logged",
+          summary: `Called ${lead.full_name} via assistant`,
+          meta: { source: "assistant", contact_number: lead.contact_number },
+        });
+        replyText = callErr
+          ? `📞 Calling ${intent.leadName} — but the call activity could not be logged. Please add a note manually.`
+          : `📞 Calling ${intent.leadName} — logged a call activity on their record.`;
         break;
       }
       case "command_note": {

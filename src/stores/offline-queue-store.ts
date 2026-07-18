@@ -81,7 +81,8 @@ function writeLS(key: string, val: any) {
 }
 
 function nid(prefix: string) {
-  return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+  // crypto.randomUUID: collision-safe — note IDs from here become DB primary keys.
+  return `${prefix}_${crypto.randomUUID()}`;
 }
 
 export const useOfflineQueue = create<OfflineQueueState>((set, get) => ({
@@ -119,6 +120,8 @@ export const useOfflineQueue = create<OfflineQueueState>((set, get) => ({
 
     // 1. Push local queue items to Supabase offline_outbox
     if (queue.length > 0) {
+      const pushed: string[] = [];
+      let pushFailed = false;
       for (const item of queue) {
         const payload =
           item.action.kind === "update"
@@ -141,11 +144,17 @@ export const useOfflineQueue = create<OfflineQueueState>((set, get) => ({
 
         if (error) {
           console.error("Failed to push queued item to outbox:", error);
-          return { synced: 0, conflicts: 0 };
+          pushFailed = true;
+          break;
         }
+        pushed.push(item.id);
       }
-      writeLS(QUEUE_KEY, []);
-      set({ queue: [] });
+      // Remove only the items that made it to the outbox; anything after a
+      // failure stays queued locally so it can't be lost or double-inserted.
+      const remaining = get().queue.filter((q) => !pushed.includes(q.id));
+      writeLS(QUEUE_KEY, remaining);
+      set({ queue: remaining });
+      if (pushFailed) return { synced: 0, conflicts: 0 };
     }
 
     // 2. Fetch all pending outbox rows from Supabase
@@ -229,14 +238,19 @@ export const useOfflineQueue = create<OfflineQueueState>((set, get) => ({
             author_id: item.user_id,
             created_at: item.queued_at,
           });
-          applyErr = noteErr;
+          // 23505 = duplicate key: the note was already inserted by a previous
+          // replay that failed before marking the row synced. Treat as applied.
+          applyErr = noteErr && noteErr.code !== "23505" ? noteErr : null;
         }
 
         if (applyErr) {
+          // Leave the outbox row pending (synced_at stays null) so the next
+          // replay retries it — marking it synced here would silently lose
+          // the user's queued change.
           console.error(`Failed to apply mutation for lead ${item.lead_id}:`, applyErr);
-        } else {
-          syncedCount++;
+          continue;
         }
+        syncedCount++;
 
         await db
           .from("offline_outbox")
