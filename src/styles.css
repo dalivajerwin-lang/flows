@@ -1,0 +1,194 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "./styles/tokens.css";
+
+/*
+ * Tenacious CRM design system — Tailwind v4 theme mapping.
+ * All utilities read from tokens.css. Never add colors outside tokens.css.
+ */
+
+@theme inline {
+  --font-sans: var(--font-family);
+
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-text);
+  --color-surface: var(--color-surface);
+
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-light: var(--color-primary-light);
+
+  --color-secondary: var(--color-surface);
+  --color-secondary-foreground: var(--color-text);
+
+  --color-muted: var(--color-surface);
+  --color-muted-foreground: var(--color-text-secondary);
+
+  --color-accent: var(--color-primary-light);
+  --color-accent-foreground: var(--color-primary-hover);
+
+  --color-card: var(--color-background);
+  --color-card-foreground: var(--color-text);
+
+  --color-popover: var(--color-background);
+  --color-popover-foreground: var(--color-text);
+
+  --color-border: var(--color-border);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-primary);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: #ffffff;
+
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: #e5e7eb;
+  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-placeholder: var(--color-text-placeholder);
+
+  /* Status chip palette */
+  --color-chip-success-bg: #dcfce7;
+  --color-chip-success-fg: #15803d;
+  --color-chip-warning-bg: #fef9c3;
+  --color-chip-warning-fg: #854d0e;
+  --color-chip-critical-bg: #fee2e2;
+  --color-chip-critical-fg: #b91c1c;
+  --color-chip-info-bg: #dbeafe;
+  --color-chip-info-fg: #1d4ed8;
+  --color-chip-inactive-bg: #f3f4f6;
+  --color-chip-inactive-fg: #6b7280;
+  --color-chip-brand-bg: #d9f3f3;
+  --color-chip-brand-fg: #047a7a;
+  --color-chip-violet-bg: #ede9fe;
+  --color-chip-violet-fg: #6d28d9;
+
+  /* Extended semantic tokens (mirror tokens.css) */
+  --color-text-strong: var(--color-text-strong);
+  --color-text-soft: var(--color-text-soft);
+  --color-text-softer: var(--color-text-softer);
+  --color-text-subtle: var(--color-text-subtle);
+  --color-surface-subtle: var(--color-surface-subtle);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-muted: var(--color-border-muted);
+  --color-danger-soft-bg: var(--color-danger-soft-bg);
+  --color-danger-soft-bg-stronger: var(--color-danger-soft-bg-stronger);
+  --color-danger-soft-fg: var(--color-danger-soft-fg);
+  --color-danger-soft-fg-alt: var(--color-danger-soft-fg-alt);
+  --color-danger-soft-border: var(--color-danger-soft-border);
+  --color-danger-solid: var(--color-danger-solid);
+  --color-warning-soft-bg: var(--color-warning-soft-bg);
+  --color-warning-soft-bg-stronger: var(--color-warning-soft-bg-stronger);
+  --color-warning-soft-fg: var(--color-warning-soft-fg);
+  --color-warning-soft-fg-alt: var(--color-warning-soft-fg-alt);
+  --color-warning-soft-fg-icon: var(--color-warning-soft-fg-icon);
+  --color-warning-soft-fg-strong: var(--color-warning-soft-fg-strong);
+  --color-warning-soft-border: var(--color-warning-soft-border);
+  --color-warning-soft-border-stronger: var(--color-warning-soft-border-stronger);
+  --color-warning-solid: var(--color-warning-solid);
+  --color-success-soft-bg: var(--color-success-soft-bg);
+  --color-success-soft-bg-stronger: var(--color-success-soft-bg-stronger);
+  --color-success-soft-fg: var(--color-success-soft-fg);
+  --color-success-soft-fg-alt: var(--color-success-soft-fg-alt);
+  --color-success-soft-fg-icon: var(--color-success-soft-fg-icon);
+  --color-info-soft-bg: var(--color-info-soft-bg);
+  --color-info-soft-fg: var(--color-info-soft-fg);
+  --color-info-soft-border: var(--color-info-soft-border);
+  --color-info-solid: var(--color-info-solid);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 2px 8px rgba(17, 24, 39, 0.06);
+  --shadow-md: 0 10px 30px rgba(17, 24, 39, 0.08);
+  --shadow-lg: 0 24px 60px rgba(17, 24, 39, 0.12);
+
+  --breakpoint-sm: 640px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    font-family: var(--font-family);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* Motion tokens — transitions only use opacity/transform */
+@layer utilities {
+  .transition-tenacious {
+    transition-property: opacity, transform, background-color, color, border-color;
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Gentle card entrance — opacity/transform only, staggered via animation-delay */
+  .anim-rise {
+    animation: tenacious-rise 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+}
+
+@keyframes tenacious-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect prefers-reduced-motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print styles for Smart Export PDF */
+@media print {
+  body.print-report-only {
+    background: white !important;
+  }
+  body.print-report-only .no-print,
+  body.print-report-only aside,
+  body.print-report-only nav,
+  body.print-report-only [role="dialog"],
+  body.print-report-only [data-sonner-toaster] {
+    display: none !important;
+  }
+  body.print-report-only main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  body.print-report-only section {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    margin-bottom: 12px;
+  }
+}

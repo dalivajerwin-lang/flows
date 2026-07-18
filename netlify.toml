@@ -1,0 +1,35 @@
+# NOTE: This project is built with TanStack Start SSR on Cloudflare Workers via
+# @lovable.dev/vite-tanstack-config. Deploying to Netlify requires a Netlify
+# adapter for TanStack Start SSR; the config below only covers SPA fallback,
+# PWA headers, and HTTPS enforcement per Phase 10 §Launch Checklist.
+
+[[redirects]]
+  from = "http://tenacious.netlify.app/*"
+  to = "https://tenacious.netlify.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Manifest — this app references /manifest.json in the root <head>; keep the
+# header rule aligned to that filename.
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
