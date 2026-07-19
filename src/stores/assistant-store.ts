@@ -35,11 +35,7 @@ export interface ChatMessage {
 
 export type ChatWidget =
   | { kind: "panel"; panelKey: string }
-  | { kind: "personal_report" }
-  | { kind: "team_report" }
-  | { kind: "goal" }
-  | { kind: "leaderboard"; scope: "personal" | "team" }
-  | { kind: "manning"; scope: "personal" | "team" }
+  | { kind: "page_link"; to: string; label: string }
   | { kind: "stage_transition"; leadId: string; toStage: string }
   | { kind: "lead_suggestions"; leadIds: string[] };
 

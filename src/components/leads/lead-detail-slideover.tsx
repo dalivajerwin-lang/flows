@@ -135,7 +135,6 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
   const [logDate, setLogDate] = useState(() => todayKeyManila());
   const [logStart, setLogStart] = useState("10:00");
   const [logEnd, setLogEnd] = useState("11:00");
-  const [logLocation, setLogLocation] = useState("");
   const [logNotes, setLogNotes] = useState("");
   const [isLogging, setIsLogging] = useState(false);
 
@@ -163,7 +162,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
         lead_id: leadId,
         project_id: lead.project_id || null,
         title,
-        location: logLocation,
+        location: "",
         notes: logNotes,
         starts_at: startsAt,
         ends_at: endsAt,
@@ -171,7 +170,6 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
 
       toast.success("Engagement logged successfully");
       setLogFormOpen(false);
-      setLogLocation("");
       setLogNotes("");
       setLogStart("10:00");
       setLogEnd("11:00");
@@ -497,19 +495,6 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
                   />
                 </div>
               </div>
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold">Location / Link</Label>
-              <Input
-                type="text"
-                placeholder={
-                  logType === "online_presentation" ? "e.g. Zoom Link" : "e.g. Site Name"
-                }
-                value={logLocation}
-                onChange={(e) => setLogLocation(e.target.value)}
-                className="mt-1 h-8 text-sm bg-white"
-              />
             </div>
 
             <div>

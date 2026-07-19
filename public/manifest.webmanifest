@@ -1,0 +1,25 @@
+{
+  "name": "Tenacious CRM",
+  "short_name": "Tenacious",
+  "description": "Mobile-first CRM for property consultants and managers on the Team Tenacious real-estate team.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f6",
+  "theme_color": "#069494",
+  "icons": [
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "816x816",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.png",
+      "sizes": "816x816",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

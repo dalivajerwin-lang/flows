@@ -32,6 +32,8 @@ import {
   selectPendingSales,
 } from "@/lib/dashboard-selectors";
 import { compactPeso } from "@/lib/format-currency";
+import { selectLeaderboard } from "@/lib/reports/selectors";
+import { monthPeriod } from "@/lib/reports/time-filter";
 import { ChatBubble } from "./ChatBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { InputRow } from "./InputRow";
@@ -45,6 +47,20 @@ import { AssistantAvatar } from "./AssistantAvatar";
 import { cn } from "@/lib/utils";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
+
+/**
+ * Intents whose full view is a real page, not a chat panel. The reply carries
+ * a one-line summary (added in send()) plus a navigation button — the
+ * assistant routes, the page owns the data.
+ */
+const PAGE_LINK_WIDGETS: Record<string, { to: string; label: string }> = {
+  personal_report: { to: "/reports", label: "Open Reports" },
+  team_report: { to: "/reports", label: "Open Reports" },
+  leaderboard_personal: { to: "/leaderboard", label: "Open Leaderboard" },
+  leaderboard_team: { to: "/leaderboard", label: "Open Leaderboard" },
+  manning_personal: { to: "/schedule", label: "Open Schedule" },
+  manning_team: { to: "/schedule", label: "Open Schedule" },
+};
 
 export function ChatCanvas() {
   const profile = useCurrentProfile();
@@ -247,10 +263,45 @@ export function ChatCanvas() {
       case "reply":
         replyText = intent.text;
         break;
-      case "widget":
+      case "widget": {
+        // Page-routed intents: these have no chat panel — answer with a live
+        // one-liner and a button to the page that owns the full view.
+        const pageLink = PAGE_LINK_WIDGETS[intent.widgetKey];
+        if (pageLink) {
+          replyText = intent.text;
+          if (intent.widgetKey === "personal_report") {
+            const verified = selectVerifiedSalesValue(db, {
+              kind: "consultant",
+              userId: profile.id,
+            });
+            const target = profile.personal_monthly_target || 0;
+            replyText += target
+              ? ` You're at ${compactPeso(verified)} verified this month — ${Math.min(Math.round((verified / target) * 100), 999)}% of your ${compactPeso(target)} target.`
+              : ` You're at ${compactPeso(verified)} verified this month.`;
+          } else if (intent.widgetKey === "team_report") {
+            const teamVerified = selectVerifiedSalesValue(db, { kind: "team" });
+            const pending = selectPendingSales(db).length;
+            replyText += ` Team is at ${compactPeso(teamVerified)} verified this month, with ${pending} sale(s) pending verification.`;
+          } else if (intent.widgetKey === "leaderboard_personal") {
+            const rows = selectLeaderboard(db, monthPeriod());
+            const mine = rows.find((r) => r.consultant.id === profile.id);
+            replyText = mine
+              ? `You're #${mine.rank} of ${rows.length} this month with ${compactPeso(mine.closedValue)} in verified sales.`
+              : "No verified sales on the board for you yet this month — the full standings are one tap away.";
+          } else if (intent.widgetKey === "leaderboard_team") {
+            const rows = selectLeaderboard(db, monthPeriod());
+            const top = rows.find((r) => r.closedValue > 0);
+            replyText = top
+              ? `🥇 ${top.consultant.display_name} leads this month with ${compactPeso(top.closedValue)} verified across ${rows.length} consultant(s).`
+              : "No verified sales on the board yet this month.";
+          }
+          widget = { kind: "page_link", to: pageLink.to, label: pageLink.label };
+          break;
+        }
         replyText = intent.text || " ";
         widget = { kind: "panel", panelKey: intent.widgetKey };
         break;
+      }
       case "command_todo":
         addTodo(profile.id, intent.text);
         replyText = `✅ Added to your todo list: "${intent.text}".`;

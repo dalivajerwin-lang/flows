@@ -196,7 +196,7 @@ export const CONSULTANT_FIRST_DAY: FirstDayItem[] = [
 
 export const MANAGER_FIRST_DAY: FirstDayItem[] = [
   { id: "send_invites", label: "Send your invite links", to: "/team" },
-  { id: "add_project", label: "Add your first project in Settings", to: "/settings" },
+  { id: "add_project", label: "Add your first project in Projects", to: "/projects-admin" },
   { id: "post_broadcast", label: "Post a welcome broadcast to the team", to: "/" },
 ];
 

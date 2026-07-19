@@ -15,9 +15,64 @@ import { compactPeso } from "@/lib/format-currency";
 import { initials } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { PeriodPicker } from "@/components/reports/period-picker";
+import { ConsultantProfileDialog } from "@/components/team/consultant-profile-dialog";
 import { cn } from "@/lib/utils";
+import type { Database } from "@/types/supabase";
 
 type Board = "sales" | "crf";
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+/**
+ * Leaderboard avatar — photo when available, initials otherwise. For managers
+ * it's a button that opens the consultant profile preview (same dialog as the
+ * Team roster).
+ */
+function ConsultantAvatar({
+  consultant,
+  onPreview,
+  className,
+}: {
+  consultant: Profile;
+  onPreview?: (p: Profile) => void;
+  className?: string;
+}) {
+  const face = consultant.profile_photo_url ? (
+    <img
+      src={consultant.profile_photo_url}
+      alt={consultant.display_name}
+      className="h-full w-full rounded-full object-cover"
+    />
+  ) : (
+    initials(consultant.display_name)
+  );
+
+  if (!onPreview) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold text-white",
+          className,
+        )}
+      >
+        {face}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onPreview(consultant)}
+      aria-label={`View ${consultant.display_name}'s profile`}
+      className={cn(
+        "flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold text-white transition-tenacious hover:ring-2 hover:ring-[var(--color-primary)] hover:ring-offset-2",
+        className,
+      )}
+    >
+      {face}
+    </button>
+  );
+}
 
 export function LeaderboardPage() {
   const { data: leads = [], isLoading: leadsLoading } = useLeads();
@@ -26,6 +81,9 @@ export function LeaderboardPage() {
   const manager = isManagerish(me?.role ?? null);
   const [period, setPeriod] = useState<Period>(weekPeriod());
   const [board, setBoard] = useState<Board>("sales");
+  // Managers can tap an avatar to preview the consultant's profile.
+  const [previewProfile, setPreviewProfile] = useState<Profile | null>(null);
+  const openPreview = manager ? setPreviewProfile : undefined;
 
   if (leadsLoading || profilesLoading) {
     return (
@@ -144,9 +202,11 @@ export function LeaderboardPage() {
                     )}
                   >
                     <div className="text-2xl">{medal}</div>
-                    <div className="mx-auto mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white sm:h-14 sm:w-14 sm:text-base">
-                      {initials(r.consultant.display_name)}
-                    </div>
+                    <ConsultantAvatar
+                      consultant={r.consultant}
+                      onPreview={openPreview}
+                      className="mx-auto mt-1 h-10 w-10 text-sm sm:h-14 sm:w-14 sm:text-base"
+                    />
                     <div className="mt-2 truncate text-sm font-semibold">
                       {r.consultant.display_name}
                     </div>
@@ -180,6 +240,7 @@ export function LeaderboardPage() {
                       row={r}
                       me={me?.id ?? null}
                       leader={crfLeader}
+                      onPreview={openPreview}
                     />
                   ))}
                 </ul>
@@ -191,7 +252,13 @@ export function LeaderboardPage() {
                 <div className="mb-1 text-[10px] font-medium uppercase text-[var(--color-primary)]">
                   Your Position
                 </div>
-                <CrfLeaderRow row={myCrfRow} me={me?.id ?? null} leader={crfLeader} bare />
+                <CrfLeaderRow
+                  row={myCrfRow}
+                  me={me?.id ?? null}
+                  leader={crfLeader}
+                  bare
+                  onPreview={openPreview}
+                />
               </div>
             )}
           </>
@@ -222,9 +289,11 @@ export function LeaderboardPage() {
                   )}
                 >
                   <div className="text-2xl">{medal}</div>
-                  <div className="mx-auto mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white sm:h-14 sm:w-14 sm:text-base">
-                    {initials(r.consultant.display_name)}
-                  </div>
+                  <ConsultantAvatar
+                    consultant={r.consultant}
+                    onPreview={openPreview}
+                    className="mx-auto mt-1 h-10 w-10 text-sm sm:h-14 sm:w-14 sm:text-base"
+                  />
                   <div className="mt-2 truncate text-sm font-semibold">
                     {r.consultant.display_name}
                   </div>
@@ -252,7 +321,13 @@ export function LeaderboardPage() {
             <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white">
               <ul>
                 {rest.map((r) => (
-                  <LeaderRow key={r.consultant.id} row={r} me={me?.id ?? null} leader={leader} />
+                  <LeaderRow
+                    key={r.consultant.id}
+                    row={r}
+                    me={me?.id ?? null}
+                    leader={leader}
+                    onPreview={openPreview}
+                  />
                 ))}
               </ul>
             </div>
@@ -263,10 +338,24 @@ export function LeaderboardPage() {
               <div className="mb-1 text-[10px] font-medium uppercase text-[var(--color-primary)]">
                 Your Position
               </div>
-              <LeaderRow row={myRow} me={me?.id ?? null} leader={leader} bare />
+              <LeaderRow
+                row={myRow}
+                me={me?.id ?? null}
+                leader={leader}
+                bare
+                onPreview={openPreview}
+              />
             </div>
           )}
         </>
+      )}
+
+      {/* Consultant profile preview — managers only, opened from any avatar */}
+      {manager && (
+        <ConsultantProfileDialog
+          profile={previewProfile}
+          onOpenChange={(v) => !v && setPreviewProfile(null)}
+        />
       )}
     </div>
   );
@@ -277,11 +366,13 @@ function LeaderRow({
   me,
   leader,
   bare = false,
+  onPreview,
 }: {
   row: LeaderboardRow;
   me: string | null;
   leader: LeaderboardRow;
   bare?: boolean;
+  onPreview?: (p: Profile) => void;
 }) {
   const isMe = me === row.consultant.id;
   const pct = leader.closedValue > 0 ? (row.closedValue / leader.closedValue) * 100 : 0;
@@ -296,9 +387,11 @@ function LeaderRow({
       <span className="w-6 text-sm font-semibold text-[var(--color-text-secondary)]">
         #{row.rank}
       </span>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-xs font-semibold text-white">
-        {initials(row.consultant.display_name)}
-      </div>
+      <ConsultantAvatar
+        consultant={row.consultant}
+        onPreview={onPreview}
+        className="h-8 w-8 shrink-0 text-xs"
+      />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium">
           {row.consultant.display_name}
@@ -325,11 +418,13 @@ function CrfLeaderRow({
   me,
   leader,
   bare = false,
+  onPreview,
 }: {
   row: CrfLeaderboardRow;
   me: string | null;
   leader: CrfLeaderboardRow;
   bare?: boolean;
+  onPreview?: (p: Profile) => void;
 }) {
   const isMe = me === row.consultant.id;
   const pct = leader.crfCount > 0 ? (row.crfCount / leader.crfCount) * 100 : 0;
@@ -344,9 +439,11 @@ function CrfLeaderRow({
       <span className="w-6 text-sm font-semibold text-[var(--color-text-secondary)]">
         #{row.rank}
       </span>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-xs font-semibold text-white">
-        {initials(row.consultant.display_name)}
-      </div>
+      <ConsultantAvatar
+        consultant={row.consultant}
+        onPreview={onPreview}
+        className="h-8 w-8 shrink-0 text-xs"
+      />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium">
           {row.consultant.display_name}

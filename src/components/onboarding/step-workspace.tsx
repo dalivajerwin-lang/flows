@@ -140,8 +140,8 @@ export function StepWorkspace({ onGoalSaved }: { onGoalSaved: () => void }) {
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">Loading projects…</p>
         ) : projects.length === 0 ? (
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            No projects yet — add your first in <strong>Settings</strong> after onboarding. We'll
-            remind you on your first-day checklist.
+            No projects yet — add your first on the <strong>Projects</strong> page after
+            onboarding. We'll remind you on your first-day checklist.
           </p>
         ) : (
           <>
@@ -168,7 +168,7 @@ export function StepWorkspace({ onGoalSaved }: { onGoalSaved: () => void }) {
               )}
             </ul>
             <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
-              Projects are managed in Settings — you can refine these anytime.
+              Projects are managed on the Projects page — you can refine these anytime.
             </p>
           </>
         )}

@@ -14,6 +14,8 @@ import {
   Store,
   Trophy,
   UsersRound,
+  Building,
+  ShieldCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -40,6 +42,7 @@ const consultantActions: Action[] = [
 
 const managerActions: Action[] = [
   { label: "Add & Assign Client", icon: UserPlus, handler: "add_lead" },
+  { label: "Projects", icon: Building },
   { label: "Projects Computation", icon: Calculator },
   { label: "CRF Link", icon: LinkIcon },
   { label: "Reports", icon: FileBarChart },
@@ -48,6 +51,9 @@ const managerActions: Action[] = [
   { label: "Team", icon: UsersRound },
   { label: "Leaderboard", icon: Trophy },
 ];
+
+// Superadmin = manager actions + the admin console at the top (mirrors sidebarFor).
+const superadminActions: Action[] = [{ label: "Admin", icon: ShieldCheck }, ...managerActions];
 
 export function FabMenu({
   open,
@@ -61,7 +67,12 @@ export function FabMenu({
   const profile = useCurrentProfile();
   const setAddOpen = useLeadDialogs((s) => s.setAddOpen);
   const navigate = useNavigate();
-  const actions = role === "property_consultant" ? consultantActions : managerActions;
+  const actions =
+    role === "property_consultant"
+      ? consultantActions
+      : role === "superadmin"
+        ? superadminActions
+        : managerActions;
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange} title="Quick Actions">
@@ -80,6 +91,8 @@ export function FabMenu({
                   navigate({ to: "/schedule" });
                 } else if (action.label === "Projects Computation") {
                   navigate({ to: "/projects" });
+                } else if (action.label === "Projects") {
+                  navigate({ to: "/projects-admin" });
                 } else if (action.label === "CRF Link") {
                   if (!profile?.crf_link) {
                     toast("No CRF link on your profile", {
@@ -104,6 +117,8 @@ export function FabMenu({
                   navigate({ to: "/leaderboard" });
                 } else if (action.label === "Team") {
                   navigate({ to: "/team" });
+                } else if (action.label === "Admin") {
+                  navigate({ to: "/admin" });
                 } else {
                   toast("Coming in a later phase", { description: action.label });
                 }

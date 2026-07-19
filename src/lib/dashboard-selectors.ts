@@ -48,21 +48,31 @@ export interface SummaryCounts {
   cancelled: number;
 }
 
-export function selectSummaryCounts(db: DBShape, scope: Scope): SummaryCounts {
+export function selectSummaryCounts(db: DBShape, scope: Scope, period?: Period): SummaryCounts {
   // Archived leads are hidden from active views — exclude them from all summary numbers.
+  // With a period: pipeline stages count leads ADDED in the period (by current stage),
+  // closed sales count leads VERIFIED in the period — each stage filtered by the
+  // timestamp users actually mean when they pick a date range.
   const leads = db.leads.filter((l) => inScope(l, scope) && l.stage !== "archived");
-  const total = leads.length;
-  let n_new = 0,
+  let total = 0,
+    n_new = 0,
     n_crf = 0,
     n_res = 0,
     n_closed = 0,
     n_cancel = 0;
   for (const l of leads) {
-    if (l.stage === "new_lead") n_new++;
-    else if (l.stage === "crf") n_crf++;
-    else if (l.stage === "reserved") n_res++;
-    else if (l.stage === "closed_sale" && l.closed_sale_status === "verified") n_closed++;
-    else if (l.stage === "cancelled") n_cancel++;
+    const createdInPeriod = !period || inPeriod(l.created_at, period);
+    if (createdInPeriod) total++;
+    if (l.stage === "new_lead" && createdInPeriod) n_new++;
+    else if (l.stage === "crf" && createdInPeriod) n_crf++;
+    else if (l.stage === "reserved" && createdInPeriod) n_res++;
+    else if (
+      l.stage === "closed_sale" &&
+      l.closed_sale_status === "verified" &&
+      (!period || inPeriod(l.closed_sale_verified_at, period))
+    )
+      n_closed++;
+    else if (l.stage === "cancelled" && createdInPeriod) n_cancel++;
   }
   return {
     total,
@@ -76,7 +86,7 @@ export function selectSummaryCounts(db: DBShape, scope: Scope): SummaryCounts {
 
 export type StageCounts = Record<Stage, number>;
 
-export function selectStageCounts(db: DBShape, scope: Scope): StageCounts {
+export function selectStageCounts(db: DBShape, scope: Scope, period?: Period): StageCounts {
   const counts: StageCounts = {
     new_lead: 0,
     crf: 0,
@@ -88,6 +98,7 @@ export function selectStageCounts(db: DBShape, scope: Scope): StageCounts {
   };
   for (const l of db.leads) {
     if (!inScope(l, scope)) continue;
+    if (period && !inPeriod(l.created_at, period)) continue;
     counts[l.stage as Stage]++;
   }
   return counts;
@@ -273,10 +284,20 @@ export interface ActivityItem {
   lead: Lead | null;
 }
 
-export function selectRecentActivity(db: DBShape, scope: Scope, limit = 10): ActivityItem[] {
+export function selectRecentActivity(
+  db: DBShape,
+  scope: Scope,
+  limit = 10,
+  period?: Period,
+): ActivityItem[] {
   const relevantLeadIds = new Set(db.leads.filter((l) => inScope(l, scope)).map((l) => l.id));
   return db.audit_trail
-    .filter((a) => MILESTONE_TYPES.includes(a.type) && relevantLeadIds.has(a.lead_id ?? ""))
+    .filter(
+      (a) =>
+        MILESTONE_TYPES.includes(a.type) &&
+        relevantLeadIds.has(a.lead_id ?? "") &&
+        (!period || inPeriod(a.created_at, period)),
+    )
     .slice()
     .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
     .slice(0, limit)

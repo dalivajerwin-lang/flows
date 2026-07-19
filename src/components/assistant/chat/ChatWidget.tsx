@@ -14,7 +14,8 @@ import { STAGE_LABELS, type Stage } from "@/lib/constants";
 import { useCurrentProfile } from "@/stores/auth-store";
 import { isManagerish } from "@/hooks/use-role";
 import { useAssistantStore } from "@/stores/assistant-store";
-import { Bell } from "lucide-react";
+import { Bell, ArrowRight } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/tenacious-button";
 import { Textarea } from "@/components/ui/textarea";
 import { StageBadge } from "@/components/ui/status-chip";
@@ -77,10 +78,27 @@ export function ChatWidget({ widget, messageId, state }: Props) {
       />
     );
   }
+  if (widget.kind === "page_link") {
+    return <PageLinkChip to={widget.to} label={widget.label} />;
+  }
   if (widget.kind === "lead_suggestions") {
     return <LeadSuggestions leadIds={widget.leadIds} />;
   }
   return null;
+}
+
+/** Navigation chip for intents whose full view is a real page, not a chat panel. */
+function PageLinkChip({ to, label }: { to: string; label: string }) {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      onClick={() => navigate({ to })}
+      className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border-muted)] bg-white px-3 py-2 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
+    >
+      {label} <ArrowRight size={14} />
+    </button>
+  );
 }
 
 function LeadSuggestions({ leadIds }: { leadIds: string[] }) {

@@ -66,6 +66,7 @@ import {
   selectTeamOverview,
   type PriorityItem,
   type Scope,
+  type Profile,
 } from "@/lib/dashboard-selectors";
 import { compactPeso, exactPeso } from "@/lib/format-currency";
 import { STAGE_LABELS, type Stage } from "@/lib/constants";
@@ -111,7 +112,8 @@ import {
   OnboardingRevealOverlay,
 } from "@/components/onboarding/onboarding-dashboard-widgets";
 import { PeriodPicker } from "@/components/reports/period-picker";
-import { type Period, monthPeriod, prevPeriod } from "@/lib/reports/time-filter";
+import { type Period, monthPeriod, prevPeriod, currentMonthKey } from "@/lib/reports/time-filter";
+import { ConsultantProfileDialog } from "@/components/team/consultant-profile-dialog";
 
 import { cn } from "@/lib/utils";
 
@@ -279,6 +281,14 @@ export default function Dashboard() {
       <ResumeOnboardingBanner />
       <FirstDayChecklist />
 
+      {/* Global date filter — applies to every period-aware section below. */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-(--color-text-secondary)">
+          Showing: {period.kind === "all" ? "All time" : period.label}
+        </span>
+        <PeriodPicker value={period} onChange={setPeriod} />
+      </div>
+
       {isManager && (
         <Rise order={0}>
           <PendingActionsBlock />
@@ -286,7 +296,7 @@ export default function Dashboard() {
       )}
 
       <Rise order={1}>
-        <HeroSummary scope={scope} isManager={isManager} userId={profile.id} />
+        <HeroSummary scope={scope} isManager={isManager} userId={profile.id} period={period} />
       </Rise>
 
       <Rise order={2}>
@@ -298,7 +308,7 @@ export default function Dashboard() {
       </Rise>
 
       <Rise order={3}>
-        <SummaryCards scope={scope} isManager={isManager} />
+        <SummaryCards scope={scope} isManager={isManager} period={period} />
       </Rise>
 
       {/* Two-column band: Priority + Pipeline */}
@@ -308,19 +318,19 @@ export default function Dashboard() {
         </Rise>
         <Rise order={5} className="lg:col-span-5">
           <MobileCollapsible title="Pipeline Overview" defaultOpen={!isMobile}>
-            <WorkflowOverview scope={scope} />
+            <WorkflowOverview scope={scope} period={period} />
           </MobileCollapsible>
         </Rise>
       </div>
 
       <Rise order={6}>
-        <PerformanceMetrics scope={scope} period={period} onPeriodChange={setPeriod} />
+        <PerformanceMetrics scope={scope} period={period} />
       </Rise>
 
       {/* Two-column band: Activity + Insights */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <Rise order={7} className="lg:col-span-7">
-          <RecentActivity scope={scope} />
+          <RecentActivity scope={scope} period={period} />
         </Rise>
         <Rise order={8} className="lg:col-span-5">
           <MobileCollapsible
@@ -680,10 +690,12 @@ function HeroSummary({
   scope,
   isManager,
   userId,
+  period,
 }: {
   scope: Scope;
   isManager: boolean;
   userId: string;
+  period: Period;
 }) {
   const { db } = useDashboardData();
   const navigate = useNavigate();
@@ -691,15 +703,18 @@ function HeroSummary({
   const activeLeads = counts.new_lead + counts.crf + counts.reserved + counts.documentation;
   const followUps = selectPriorityItems(db, scope, { includeUnassigned: isManager }).length;
   const pendingVerifications = isManager ? selectPendingSales(db).length : 0;
-  const verified = selectVerifiedSalesValue(db, scope);
+  const verified = selectVerifiedSalesValue(db, scope, period);
   const goal = isManager ? selectTeamGoal(db) : selectPersonalTarget(db, userId).amount;
+  // Goals are monthly — only compare when the filter is on the current month.
+  const isCurrentMonth = period.kind === "month" && period.monthKey === currentMonthKey();
+  const showGoal = !!goal && isCurrentMonth;
 
   // Same pacing math as QuickInsights.
   const now = new Date();
   const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const paceRatio = dayOfMonth / daysInMonth;
-  const attained = goal ? verified / goal : 0;
+  const attained = showGoal && goal ? verified / goal : 0;
   const onTrack = attained >= paceRatio;
 
   const [animPct, setAnimPct] = useState(0);
@@ -708,10 +723,13 @@ function HeroSummary({
     return () => clearTimeout(t);
   }, [attained]);
 
-  const insight = !goal
-    ? isManager
-      ? "Set a team goal to start tracking monthly pace."
-      : "Ask your manager about a personal target — or keep those follow-ups moving."
+  const periodLabel = period.kind === "all" ? "all time" : period.label.toLowerCase();
+  const insight = !showGoal
+    ? goal
+      ? `Verified sales — ${periodLabel}.`
+      : isManager
+        ? "Set a team goal to start tracking monthly pace."
+        : "Ask your manager about a personal target — or keep those follow-ups moving."
     : attained >= 1
       ? "🎉 Goal reached — outstanding month!"
       : onTrack
@@ -749,10 +767,12 @@ function HeroSummary({
             {compactPeso(verified)}
           </span>
           <span className="text-xs font-medium text-(--color-primary-hover)">
-            {goal ? `of ${compactPeso(goal)} ${isManager ? "team goal" : "goal"}` : "this month"}
+            {showGoal && goal
+              ? `of ${compactPeso(goal)} ${isManager ? "team goal" : "goal"}`
+              : periodLabel}
           </span>
         </div>
-        {goal ? (
+        {showGoal ? (
           <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-white/70">
             <div
               className="h-full rounded-full bg-(--color-primary) transition-[width] duration-600 ease-out"
@@ -768,15 +788,7 @@ function HeroSummary({
 
 // ==== Performance Metrics ====
 
-function PerformanceMetrics({
-  scope,
-  period,
-  onPeriodChange,
-}: {
-  scope: Scope;
-  period: Period;
-  onPeriodChange: (p: Period) => void;
-}) {
+function PerformanceMetrics({ scope, period }: { scope: Scope; period: Period }) {
   const { db } = useDashboardData();
   const navigate = useNavigate();
   const verified = selectVerifiedSalesValue(db, scope, period);
@@ -800,10 +812,7 @@ function PerformanceMetrics({
 
   return (
     <div>
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <SectionHeader title="Performance" className="mb-0" />
-        <PeriodPicker value={period} onChange={onPeriodChange} />
-      </div>
+      <SectionHeader title="Performance" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           value={compactPeso(verified)}
@@ -866,9 +875,17 @@ function MobileCollapsible({
 
 // ==== Summary Cards ====
 
-function SummaryCards({ scope, isManager }: { scope: Scope; isManager: boolean }) {
+function SummaryCards({
+  scope,
+  isManager,
+  period,
+}: {
+  scope: Scope;
+  isManager: boolean;
+  period: Period;
+}) {
   const { db } = useDashboardData();
-  const counts = selectSummaryCounts(db, scope);
+  const counts = selectSummaryCounts(db, scope, period);
   const prefix = isManager ? "Team" : "My";
   const cards: Array<{ label: string; value: number; stage: Stage | "all" }> = [
     { label: `${prefix} Total Leads`, value: counts.total, stage: "all" },
@@ -1350,9 +1367,9 @@ const STAGE_COLOR: Record<Stage, string> = {
   archived: "var(--color-chip-inactive-fg)",
 };
 
-function WorkflowOverview({ scope }: { scope: Scope }) {
+function WorkflowOverview({ scope, period }: { scope: Scope; period: Period }) {
   const { db } = useDashboardData();
-  const counts = selectStageCounts(db, scope);
+  const counts = selectStageCounts(db, scope, period);
   const navigate = useNavigate();
   const max = Math.max(1, ...FUNNEL.map((s) => counts[s]));
   return (
@@ -1382,14 +1399,16 @@ function WorkflowOverview({ scope }: { scope: Scope }) {
 
 // ==== Recent Activity ====
 
-function RecentActivity({ scope }: { scope: Scope }) {
+function RecentActivity({ scope, period }: { scope: Scope; period: Period }) {
   const { db } = useDashboardData();
-  const items = selectRecentActivity(db, scope, 10);
+  const items = selectRecentActivity(db, scope, 10, period);
   const navigate = useNavigate();
   return (
     <SectionCard title="Recent Activity">
       {items.length === 0 ? (
-        <p className="py-3 text-sm text-(--color-text-secondary)">No milestone activity yet.</p>
+        <p className="py-3 text-sm text-(--color-text-secondary)">
+          No milestone activity in this period.
+        </p>
       ) : (
         <ul>
           {items.map(({ entry, lead }, i) => (
@@ -1651,6 +1670,31 @@ function TeamOverviewTable() {
   const navigate = useNavigate();
   const isMobile = !useMediaQuery("(min-width: 1024px)");
   const go = (id: string) => navigate({ to: "/leads", search: { assigned: id } });
+  // Tapping the avatar previews the consultant's profile; the rest of the row
+  // still jumps to their lead list.
+  const [previewProfile, setPreviewProfile] = useState<Profile | null>(null);
+
+  const avatarFor = (c: Profile) => (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        setPreviewProfile(c);
+      }}
+      aria-label={`View ${c.display_name}'s profile`}
+      className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-full bg-(--color-primary-light) text-xs font-semibold text-(--color-primary-hover) hover:ring-2 hover:ring-(--color-primary)"
+    >
+      {c.profile_photo_url ? (
+        <img
+          src={c.profile_photo_url}
+          alt={c.display_name}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        initials(c.display_name)
+      )}
+    </button>
+  );
 
   if (isMobile) {
     return (
@@ -1658,18 +1702,30 @@ function TeamOverviewTable() {
         <ul className="space-y-2">
           {rows.map((r) => (
             <li key={r.consultant.id}>
-              <button
+              {/* div+role, not button — the avatar inside is its own button */}
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => go(r.consultant.id)}
-                className="w-full rounded-(--radius-md) border border-(--color-border) p-3 text-left"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    go(r.consultant.id);
+                  }
+                }}
+                className="w-full cursor-pointer rounded-(--radius-md) border border-(--color-border) p-3 text-left"
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-medium text-sm truncate">
-                    {!r.consultant.is_active && (
-                      <StatusChip variant="inactive" className="mr-1 py-0! text-[10px]!">
-                        Inactive
-                      </StatusChip>
-                    )}
-                    {r.consultant.display_name}
+                  <div className="flex min-w-0 items-center gap-2">
+                    {avatarFor(r.consultant)}
+                    <div className="font-medium text-sm truncate">
+                      {!r.consultant.is_active && (
+                        <StatusChip variant="inactive" className="mr-1 py-0! text-[10px]!">
+                          Inactive
+                        </StatusChip>
+                      )}
+                      {r.consultant.display_name}
+                    </div>
                   </div>
                   <span className="text-xs text-(--color-text-secondary)">
                     {relative(r.lastLogin)}
@@ -1689,10 +1745,14 @@ function TeamOverviewTable() {
                     Closed: <b>{r.closedCount}</b> · {compactPeso(r.closedValue)}
                   </span>
                 </div>
-              </button>
+              </div>
             </li>
           ))}
         </ul>
+        <ConsultantProfileDialog
+          profile={previewProfile}
+          onOpenChange={(v) => !v && setPreviewProfile(null)}
+        />
       </SectionCard>
     );
   }
@@ -1721,9 +1781,7 @@ function TeamOverviewTable() {
               >
                 <td className="py-2 pr-3">
                   <div className="flex items-center gap-2">
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-(--color-primary-light) text-xs font-semibold text-(--color-primary-hover)">
-                      {initials(r.consultant.display_name)}
-                    </span>
+                    {avatarFor(r.consultant)}
                     <span
                       className={cn(!r.consultant.is_active && "text-(--color-text-secondary)")}
                     >
@@ -1752,6 +1810,10 @@ function TeamOverviewTable() {
           </tbody>
         </table>
       </div>
+      <ConsultantProfileDialog
+        profile={previewProfile}
+        onOpenChange={(v) => !v && setPreviewProfile(null)}
+      />
     </SectionCard>
   );
 }

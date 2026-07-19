@@ -110,6 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "apple-touch-icon", href: "/icons/icon-512.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -142,6 +143,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    // PWA installability: Chrome/Edge (esp. Android) require a registered
+    // service worker before firing `beforeinstallprompt`. sw.js is a no-op
+    // network passthrough — no caching.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        // Non-fatal — the app works fine without it; only install is affected.
+      });
+    }
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AppShell>

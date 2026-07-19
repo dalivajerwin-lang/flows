@@ -1,3 +1,5 @@
-1. Superadmin Assistant Should be different from Manager and COnsultant.
+# make the default goal for onboarding choices 50M 100m 100m for the manager
 
-what will happen if there is more than 100 leads and workflow already does my current system solve it?
+# in my current dashboard only performance have date filter. that date filter should effect in overall dashboard.
+
+#

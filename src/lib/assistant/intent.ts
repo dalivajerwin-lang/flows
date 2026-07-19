@@ -19,9 +19,17 @@ const consultantMap: Array<[RegExp, string, string]> = [
   [/\b(goal|target|progress)\b/i, "goal", "Here is your personal goal tracker."],
   [/\bnotifications?\b/i, "notifications", "Your notification feed:"],
   [/\b(links|resources)\b/i, "links", "Team links library:"],
-  [/\b(report|weekly report|my activity)\b/i, "personal_report", "Your personal activity report:"],
-  [/\b(rank|leaderboard|position)\b/i, "leaderboard_personal", ""],
-  [/\b(shift|manning|booth)\b/i, "manning_personal", "Your upcoming manning shifts:"],
+  [
+    /\b(report|weekly report|my activity)\b/i,
+    "personal_report",
+    "Here's a quick look at your month — full breakdown on the Reports page:",
+  ],
+  [/\b(rank|leaderboard|position)\b/i, "leaderboard_personal", "Here's where you stand:"],
+  [
+    /\b(shift|manning|booth)\b/i,
+    "manning_personal",
+    "Manning and booth duty live on the Schedule page:",
+  ],
 ];
 
 const managerMap: Array<[RegExp, string, string]> = [
@@ -31,9 +39,13 @@ const managerMap: Array<[RegExp, string, string]> = [
   [/\b(reversion|request|inbox)\b/i, "reversion_inbox", "Pending stage reversion requests:"],
   [/\b(projects|calculations)\b/i, "projects_admin", "Project management (admin):"],
   [/\b(links|library)\b/i, "links_admin", "Team links library (admin):"],
-  [/\b(report|weekly summary|performance)\b/i, "team_report", "Consolidated team activity:"],
-  [/\b(rank|leaderboard)\b/i, "leaderboard_team", ""],
-  [/\b(shift|manning|booth)\b/i, "manning_team", "This week's manning roster:"],
+  [
+    /\b(report|weekly summary|performance)\b/i,
+    "team_report",
+    "Here's the team snapshot — full breakdown on the Reports page:",
+  ],
+  [/\b(rank|leaderboard)\b/i, "leaderboard_team", "Here's the current standing:"],
+  [/\b(shift|manning|booth)\b/i, "manning_team", "The manning roster lives on the Schedule page:"],
   [/\bnotifications?\b/i, "notifications", "Your notification feed:"],
 ];
 

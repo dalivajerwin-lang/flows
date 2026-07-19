@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
 import { requireManager } from "@/lib/route-guards";
 import { isManagerish } from "@/hooks/use-role";
+import { ConsultantProfileDialog } from "@/components/team/consultant-profile-dialog";
 import {
   Copy,
   Plus,
@@ -66,6 +67,7 @@ function TeamPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [previewProfile, setPreviewProfile] = useState<(typeof profiles)[number] | null>(null);
 
   // Invite Form State
   const [inviteName, setInviteName] = useState("");
@@ -233,7 +235,12 @@ function TeamPage() {
                         className={!p.is_active ? "opacity-60 bg-gray-50/50" : ""}
                       >
                         <TableCell>
-                          <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewProfile(p)}
+                            className="flex items-center gap-3 text-left rounded-md -m-1 p-1 hover:bg-[var(--color-surface)] transition-colors cursor-pointer"
+                            aria-label={`View ${p.display_name}'s profile`}
+                          >
                             <div className="h-9 w-9 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center font-bold text-[var(--color-primary)] overflow-hidden">
                               {p.profile_photo_url ? (
                                 <img
@@ -253,7 +260,7 @@ function TeamPage() {
                                 {p.email}
                               </div>
                             </div>
-                          </div>
+                          </button>
                         </TableCell>
                         <TableCell className="font-mono text-sm font-semibold">
                           {p.agent_number}
@@ -482,6 +489,12 @@ function TeamPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Consultant profile preview — opened from the roster avatar/name */}
+      <ConsultantProfileDialog
+        profile={previewProfile}
+        onOpenChange={(v) => !v && setPreviewProfile(null)}
+      />
     </div>
   );
 }

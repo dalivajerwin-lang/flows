@@ -34,9 +34,8 @@ export interface LeadCreateInput {
 }
 
 export type DuplicateResult =
-  | { ok: true; leadId: string }
-  | { ok: false; block: true; reason: "phone" | "facebook" }
-  | { ok: false; warn: true; reason: "name_project"; existingId: string };
+  | { ok: true; leadId: string; sameNameExistingId?: string }
+  | { ok: false; block: true; reason: "phone" | "facebook" };
 
 interface LeadsUIState {
   search: string;
@@ -263,10 +262,7 @@ async function logAudit(
   });
 }
 
-export async function createLead(
-  input: LeadCreateInput,
-  opts: { force?: boolean } = {},
-): Promise<DuplicateResult> {
+export async function createLead(input: LeadCreateInput): Promise<DuplicateResult> {
   const auth = useAuth.getState();
   if (!auth.userId || !auth.profile) return { ok: false, block: true, reason: "phone" };
   const me = auth.profile;
@@ -275,10 +271,10 @@ export async function createLead(
   const phoneDup = await checkPhoneDuplicate(normalized);
   if (phoneDup) return { ok: false, block: true, reason: "phone" };
 
+  // Same name + project is common (namesakes, family members) — never block or
+  // interrupt the flow. The lead is created and the caller may surface a quiet
+  // heads-up toast via sameNameExistingId.
   const nameDup = await checkNameProjectDuplicate(input.full_name, input.project_id);
-  if (nameDup && !opts.force) {
-    return { ok: false, warn: true, reason: "name_project", existingId: nameDup.id };
-  }
 
   const assignedTo = me.role === "property_consultant" ? me.id : input.assigned_to;
 
@@ -341,7 +337,7 @@ export async function createLead(
   }
 
   queryClient.invalidateQueries({ queryKey: ["leads"] });
-  return { ok: true, leadId };
+  return { ok: true, leadId, sameNameExistingId: nameDup?.id };
 }
 
 export async function updateLead(
