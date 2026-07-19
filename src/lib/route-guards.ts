@@ -54,6 +54,19 @@ export async function requireManager() {
   }
 }
 
+/** Redirect to / unless the session user is the superadmin. */
+export async function requireSuperadmin() {
+  if (typeof window === "undefined") return;
+  const userId = await getSessionUserId();
+  if (!userId) {
+    throw redirect({ to: "/login" });
+  }
+  const role = await getRole(userId);
+  if (role !== "superadmin") {
+    throw redirect({ to: "/" });
+  }
+}
+
 /** For /login: send already-authenticated users to the dashboard. */
 export async function redirectIfAuthed() {
   if (typeof window === "undefined") return;

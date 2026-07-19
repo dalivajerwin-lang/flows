@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth-store";
+import { db } from "@/lib/supabase";
+import { needsOnboarding } from "@/lib/onboarding-config";
 import { Button } from "@/components/ui/tenacious-button";
 import { Field, TenaciousInput } from "@/components/ui/form-controls";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
@@ -15,6 +17,21 @@ export const Route = createFileRoute("/login")({
   notFoundComponent: RouteNotFoundBoundary,
 });
 
+/** Rollout flag (§12.4): onboarding_enabled on system_settings. Fail open —
+ * a fetch error must never block login. */
+async function isOnboardingEnabled(): Promise<boolean> {
+  try {
+    const { data } = await db
+      .from("system_settings")
+      .select("onboarding_enabled")
+      .eq("id", 1)
+      .maybeSingle();
+    return data?.onboarding_enabled !== false;
+  } catch {
+    return true;
+  }
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const login = useAuth((s) => s.login);
@@ -26,8 +43,10 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (userId) navigate({ to: "/" });
-  }, [userId, navigate]);
+    // Only for already-authed visits to /login. During an active submit the
+    // onSubmit handler owns navigation (it may route to /onboarding instead).
+    if (userId && !isLoading) navigate({ to: "/" });
+  }, [userId, isLoading, navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +57,19 @@ function LoginPage() {
       if (!result.ok) {
         setError(result.error);
         return;
+      }
+      // First-run onboarding (§2.1): never started, or started but neither
+      // finished nor exited → the flow, gated by the rollout flag (§12.4).
+      // The superadmin never onboards — they administer the workspace.
+      if (
+        result.profile.role !== "superadmin" &&
+        needsOnboarding((result.profile as { onboarding?: unknown }).onboarding)
+      ) {
+        const enabled = await isOnboardingEnabled();
+        if (enabled) {
+          navigate({ to: "/onboarding" });
+          return;
+        }
       }
       toast.success(`Welcome back, ${result.profile.display_name.split(" ")[0]}!`);
       navigate({ to: "/" });

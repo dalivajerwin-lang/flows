@@ -105,6 +105,11 @@ import {
   CONSULTANT_DEFAULT_SHORTCUTS,
   MANAGER_DEFAULT_SHORTCUTS,
 } from "@/stores/quick-links-store";
+import {
+  ResumeOnboardingBanner,
+  FirstDayChecklist,
+  OnboardingRevealOverlay,
+} from "@/components/onboarding/onboarding-dashboard-widgets";
 import { PeriodPicker } from "@/components/reports/period-picker";
 import { type Period, monthPeriod, prevPeriod } from "@/lib/reports/time-filter";
 
@@ -226,7 +231,10 @@ export default function Dashboard() {
   if (visibleLeadsCount === 0) {
     return (
       <div className="space-y-4">
+        <OnboardingRevealOverlay />
         <DashboardHeader profile={profile} isManager={isManager} />
+        <ResumeOnboardingBanner />
+        <FirstDayChecklist />
         <SectionCard title="Getting started">
           <ol className="space-y-3 text-sm text-(--color-text-secondary)">
             <li className="flex items-start gap-3">
@@ -265,7 +273,11 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5">
+      <OnboardingRevealOverlay />
       <DashboardHeader profile={profile} isManager={isManager} />
+
+      <ResumeOnboardingBanner />
+      <FirstDayChecklist />
 
       {isManager && (
         <Rise order={0}>

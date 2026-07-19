@@ -76,6 +76,49 @@ export function selectLeaderboard(db: DBShape, period: Period): LeaderboardRow[]
   return filtered;
 }
 
+// ---------- CRF Leaderboard ----------
+
+export interface CrfLeaderboardRow {
+  consultant: Profile;
+  isInactive: boolean;
+  /** Leads that first entered the CRF stage during the period. */
+  crfCount: number;
+  /** How many of those progressed to reserved or beyond. */
+  progressedCount: number;
+  rank: number;
+}
+
+const CRF_PROGRESSED_STAGES = new Set(["reserved", "documentation", "closed_sale"]);
+
+export function selectCrfLeaderboard(db: DBShape, period: Period): CrfLeaderboardRow[] {
+  const consultants = db.profiles.filter((p) => p.role === "property_consultant");
+  const rows = consultants.map((c) => {
+    const crfs = db.leads.filter(
+      (l) =>
+        l.assigned_to === c.id &&
+        !l.deleted_at &&
+        l.crf_first_entered_at != null &&
+        inPeriod(l.crf_first_entered_at, period),
+    );
+    return {
+      consultant: c,
+      isInactive: !c.is_active,
+      crfCount: crfs.length,
+      progressedCount: crfs.filter((l) => CRF_PROGRESSED_STAGES.has(l.stage)).length,
+      rank: 0,
+    };
+  });
+  // Mirror the sales board: deactivated consultants only shown when they scored.
+  const filtered = rows.filter((r) => !r.isInactive || r.crfCount > 0);
+  filtered.sort((a, b) => {
+    if (b.crfCount !== a.crfCount) return b.crfCount - a.crfCount;
+    if (b.progressedCount !== a.progressedCount) return b.progressedCount - a.progressedCount;
+    return a.consultant.display_name.localeCompare(b.consultant.display_name);
+  });
+  filtered.forEach((r, i) => (r.rank = i + 1));
+  return filtered;
+}
+
 // ---------- Report 1: Sales Revenue Summary ----------
 
 export interface RevenueRow {

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type AssistantMode = "conversational" | "console";
+export type AssistantMode = "conversational" | "notifications" | "console";
 
 export interface TodoItem {
   id: string;

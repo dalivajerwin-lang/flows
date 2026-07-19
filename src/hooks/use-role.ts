@@ -8,3 +8,7 @@ export function useRole(): Role | null {
 export function isManagerish(role: Role | null): boolean {
   return role === "manager" || role === "superadmin";
 }
+
+export function useIsSuperadmin(): boolean {
+  return useRole() === "superadmin";
+}

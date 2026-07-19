@@ -16,6 +16,7 @@ export interface Database {
           is_active: boolean;
           last_login_at: string | null;
           personal_monthly_target: number;
+          onboarding: Json | null;
           created_at: string;
           updated_at: string;
         };
@@ -31,6 +32,7 @@ export interface Database {
           is_active?: boolean;
           last_login_at?: string | null;
           personal_monthly_target?: number | bigint;
+          onboarding?: Json | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -46,6 +48,7 @@ export interface Database {
           is_active?: boolean;
           last_login_at?: string | null;
           personal_monthly_target?: number | bigint;
+          onboarding?: Json | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -331,28 +334,31 @@ export interface Database {
         Row: {
           id: string;
           lead_id: string | null;
-          actor_id: string;
+          actor_id: string | null;
           type: string;
           summary: string;
           meta: Json;
+          severity: "info" | "warning" | "critical";
           created_at: string;
         };
         Insert: {
           id?: string;
           lead_id?: string | null;
-          actor_id: string;
+          actor_id?: string | null;
           type: string;
           summary: string;
           meta?: Json;
+          severity?: "info" | "warning" | "critical";
           created_at?: string;
         };
         Update: {
           id?: string;
           lead_id?: string | null;
-          actor_id?: string;
+          actor_id?: string | null;
           type?: string;
           summary?: string;
           meta?: Json;
+          severity?: "info" | "warning" | "critical";
           created_at?: string;
         };
         Relationships: [
@@ -750,16 +756,19 @@ export interface Database {
           id: number;
           company_timezone: string;
           registration_locked: boolean;
+          onboarding_enabled: boolean;
         };
         Insert: {
           id?: number;
           company_timezone?: string;
           registration_locked?: boolean;
+          onboarding_enabled?: boolean;
         };
         Update: {
           id?: number;
           company_timezone?: string;
           registration_locked?: boolean;
+          onboarding_enabled?: boolean;
         };
         Relationships: [];
       };
@@ -868,6 +877,45 @@ export interface Database {
       sweep_expiries_cron: {
         Args: Record<PropertyKey, never>;
         Returns: void;
+      };
+      is_superadmin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      admin_update_system_settings: {
+        Args: {
+          p_registration_locked?: boolean | null;
+          p_onboarding_enabled?: boolean | null;
+        };
+        Returns: void;
+      };
+      admin_set_role: {
+        Args: { p_target_id: string; p_new_role: string };
+        Returns: void;
+      };
+      admin_set_active: {
+        Args: { p_target_id: string; p_active: boolean };
+        Returns: void;
+      };
+      admin_revoke_token: {
+        Args: { p_token_id: string };
+        Returns: void;
+      };
+      admin_reassign_leads: {
+        Args: { p_from_user: string; p_to_user: string; p_lead_ids?: string[] | null };
+        Returns: number;
+      };
+      admin_force_stage: {
+        Args: { p_lead_id: string; p_to_stage: string; p_reason: string };
+        Returns: void;
+      };
+      admin_restore_lead: {
+        Args: { p_lead_id: string };
+        Returns: void;
+      };
+      admin_health_snapshot: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
       };
     };
     Enums: {

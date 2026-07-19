@@ -5,6 +5,8 @@ import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { useNotifications, useRealtimeNotifications } from "@/hooks/use-notifications";
 import { useRealtimeBroadcasts, useRealtimeAcknowledgments } from "@/hooks/use-broadcasts";
 import { useSettings } from "@/stores/settings-store";
+import { useSystemSettings } from "@/hooks/use-registration-tokens";
+import { needsOnboarding } from "@/lib/onboarding-config";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useTicker } from "@/stores/ticker-store";
 import { Sidebar } from "./sidebar";
@@ -21,6 +23,9 @@ import { cn } from "@/lib/utils";
 
 const PUBLIC_PATHS = new Set(["/login", "/register"]);
 
+// Authenticated but chrome-less routes (rendered bare after the auth gate).
+const STANDALONE_AUTHED_PATHS = new Set(["/onboarding"]);
+
 const PAGE_TITLES: Record<string, string> = {
   "/": "Dashboard",
   "/leads": "Leads",
@@ -33,6 +38,10 @@ const PAGE_TITLES: Record<string, string> = {
   "/projects": "Projects Computation",
   "/profile": "My Profile",
   "/settings": "Settings",
+  "/admin": "Admin Console",
+  "/admin/users": "User Administration",
+  "/admin/audit": "Audit Log",
+  "/admin/tools": "Intervention Tools",
 };
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -118,6 +127,20 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [hydrated, profile, path, navigate]);
 
+  // First-run onboarding trigger (§2.1): once hydrated, an account that never
+  // started (onboarding null) or exited without finishing-or-skipping is sent
+  // to the chrome-less flow. Gated by the system_settings rollout flag; also
+  // powers cross-device resume — state lives in the DB, not localStorage.
+  const { data: systemSettings } = useSystemSettings();
+  useEffect(() => {
+    if (!hydrated || !profile || isPublic || path === "/onboarding") return;
+    if (profile.role === "superadmin") return; // superadmin never onboards
+    if (!systemSettings || systemSettings.onboarding_enabled === false) return;
+    if (needsOnboarding((profile as { onboarding?: unknown }).onboarding)) {
+      navigate({ to: "/onboarding" });
+    }
+  }, [hydrated, profile, isPublic, path, systemSettings, navigate]);
+
   // Before hydration completes on the client, render nothing for protected
   // paths (their content must never flash unauthenticated — the SSR pass and
   // first client paint both land here). Public routes render as-is to match
@@ -138,6 +161,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   // never the protected content.
   if (!profile) {
     return <AuthGate />;
+  }
+
+  // /onboarding is protected but renders without the app chrome (§2.1) —
+  // the auth gate above has already run, so bare children are safe here.
+  if (STANDALONE_AUTHED_PATHS.has(path)) {
+    return (
+      <>
+        {children}
+        <NotificationToaster />
+      </>
+    );
   }
 
   const unreadCount = notifications.filter((n) => n.user_id === profile.id && !n.is_read).length;

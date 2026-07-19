@@ -33,6 +33,8 @@ serve(async (req) => {
     let finalRole = role;
     let finalDisplayName = display_name;
     let finalAgentNumber = agent_number;
+    let callerId: string | null = null;
+    let tokenCreatedBy: string | null = null;
 
     // 1. Authorize the request. Two allowed paths:
     //    a) A valid single-use registration token (role comes from the token).
@@ -57,6 +59,7 @@ serve(async (req) => {
       finalRole = tokenData.intended_role;
       finalDisplayName = tokenData.intended_display_name;
       finalAgentNumber = tokenData.intended_agent_number;
+      tokenCreatedBy = tokenData.created_by ?? null;
     } else {
       const authHeader = req.headers.get("Authorization") ?? "";
       const jwt = authHeader.replace(/^Bearer\s+/i, "");
@@ -92,12 +95,24 @@ serve(async (req) => {
         });
       }
 
-      // Direct invites can never mint a superadmin.
+      callerId = callerData.user.id;
+
+      // Direct invites can never mint a superadmin, and only the
+      // superadmin can create managers — managers invite consultants only.
       if (!["manager", "property_consultant"].includes(finalRole)) {
         return new Response(JSON.stringify({ error: "Invalid role." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+      if (finalRole === "manager" && callerProfile.role !== "superadmin") {
+        return new Response(
+          JSON.stringify({ error: "Only the superadmin can create manager accounts." }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
     }
 
@@ -108,21 +123,25 @@ serve(async (req) => {
       });
     }
 
-    // Check if registration is locked in system settings (unless creating via direct admin bypass, or enforce settings globally)
-    const { data: settings } = await adminClient
-      .from("system_settings")
-      .select("registration_locked")
-      .eq("id", 1)
-      .maybeSingle();
+    // Registration lock only gates token self-registration. Direct invites
+    // are authorized by an active manager/superadmin JWT — the lock exists
+    // to stop link-based signups, not the admins themselves.
+    if (!callerId) {
+      const { data: settings } = await adminClient
+        .from("system_settings")
+        .select("registration_locked")
+        .eq("id", 1)
+        .maybeSingle();
 
-    if (settings?.registration_locked) {
-      return new Response(
-        JSON.stringify({ error: "New registrations are currently locked by the administrator." }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      if (settings?.registration_locked) {
+        return new Response(
+          JSON.stringify({ error: "New registrations are currently locked by the administrator." }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
     }
 
     // 2. Create the user in Auth
@@ -167,6 +186,23 @@ serve(async (req) => {
         p_used_by: user.id,
       });
     }
+
+    // 5. Audit (best-effort; never blocks the invite).
+    await adminClient
+      .from("audit_trail")
+      .insert({
+        actor_id: callerId ?? tokenCreatedBy,
+        type: token ? "user.token_redeemed" : "user.invited",
+        summary: token
+          ? `Registration token redeemed by ${finalDisplayName} (agent #${finalAgentNumber})`
+          : `User ${finalDisplayName} (agent #${finalAgentNumber}) invited as ${finalRole}`,
+        meta: { new_user_id: user.id, email, role: finalRole, via_token: Boolean(token) },
+        severity: "info",
+      })
+      .then(
+        () => undefined,
+        () => undefined,
+      );
 
     return new Response(JSON.stringify({ id: user.id, message: "User created successfully" }), {
       status: 200,

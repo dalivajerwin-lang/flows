@@ -55,26 +55,29 @@ export function useSystemSettings() {
       if (error) throw new Error(error.message);
       if (!data) {
         // Fallback fallback settings
-        return { id: 1, company_timezone: "Asia/Manila", registration_locked: false };
+        return {
+          id: 1,
+          company_timezone: "Asia/Manila",
+          registration_locked: false,
+          onboarding_enabled: true,
+        };
       }
       return data as SystemSettings;
     },
   });
 }
 
-// Update system settings (superadmin only)
+// Update system settings (superadmin only). Goes through the audited
+// admin_update_system_settings RPC so every toggle lands in audit_trail.
 export function useUpdateSystemSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (patch: Partial<Omit<SystemSettings, "id">>) => {
-      const { data, error } = await db
-        .from("system_settings")
-        .update(patch)
-        .eq("id", 1)
-        .select()
-        .single();
+    mutationFn: async (patch: Partial<Pick<SystemSettings, "registration_locked" | "onboarding_enabled">>) => {
+      const { error } = await db.rpc("admin_update_system_settings", {
+        p_registration_locked: patch.registration_locked ?? null,
+        p_onboarding_enabled: patch.onboarding_enabled ?? null,
+      });
       if (error) throw new Error(error.message);
-      return data as SystemSettings;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["system_settings"] });

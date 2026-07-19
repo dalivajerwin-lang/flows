@@ -64,15 +64,34 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // Best-effort audit write; a logging failure must never block login.
+    const audit = (row: {
+      actor_id?: string | null;
+      type: string;
+      summary: string;
+      meta?: Record<string, unknown>;
+      severity?: "info" | "warning" | "critical";
+    }) =>
+      adminClient
+        .from("audit_trail")
+        .insert({ severity: "info", ...row })
+        .then(() => undefined, () => undefined);
+
     // Resolve agent number → email server-side only.
     const { data: profile } = await adminClient
       .from("profiles")
-      .select("email")
+      .select("id, email")
       .eq("agent_number", agent_number.trim())
       .eq("is_active", true)
       .maybeSingle();
 
     if (!profile?.email) {
+      await audit({
+        type: "auth.login_failed",
+        summary: `Failed login: unknown or inactive agent number`,
+        meta: { agent_number: agent_number.trim(), ip },
+        severity: "warning",
+      });
       // Same error and status as a wrong password — no enumeration signal.
       return json({ error: GENERIC_ERROR }, 401);
     }
@@ -88,8 +107,22 @@ serve(async (req) => {
     });
 
     if (authError || !authData.session) {
+      await audit({
+        actor_id: profile.id,
+        type: "auth.login_failed",
+        summary: "Failed login: wrong password",
+        meta: { agent_number: agent_number.trim(), ip },
+        severity: "warning",
+      });
       return json({ error: GENERIC_ERROR }, 401);
     }
+
+    await audit({
+      actor_id: profile.id,
+      type: "auth.login",
+      summary: "Signed in via agent number",
+      meta: { ip },
+    });
 
     return json(
       {

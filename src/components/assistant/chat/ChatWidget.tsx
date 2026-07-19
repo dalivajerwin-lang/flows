@@ -3,7 +3,6 @@ import { DailyAgendaPanel } from "../console/panels/DailyAgendaPanel";
 import { ExpiryWarningsPanel } from "../console/panels/ExpiryWarningsPanel";
 import { StagnantLeadsPanel } from "../console/panels/StagnantLeadsPanel";
 import { GoalTrackerPanel } from "../console/panels/GoalTrackerPanel";
-import { NotificationCenterPanel } from "../console/panels/NotificationCenterPanel";
 import { LinksLibraryPanel } from "../console/panels/LinksLibraryPanel";
 import { TeamGuardPanel } from "../console/panels/TeamGuardPanel";
 import { BottleneckPanel } from "../console/panels/BottleneckPanel";
@@ -14,6 +13,8 @@ import { ReversionInboxPanel } from "../console/panels/ReversionInboxPanel";
 import { STAGE_LABELS, type Stage } from "@/lib/constants";
 import { useCurrentProfile } from "@/stores/auth-store";
 import { isManagerish } from "@/hooks/use-role";
+import { useAssistantStore } from "@/stores/assistant-store";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/tenacious-button";
 import { Textarea } from "@/components/ui/textarea";
 import { StageBadge } from "@/components/ui/status-chip";
@@ -26,7 +27,7 @@ const PANEL_MAP: Record<string, React.ComponentType> = {
   expiry: ExpiryWarningsPanel,
   stagnant: StagnantLeadsPanel,
   goal: GoalTrackerPanel,
-  notifications: () => <NotificationCenterPanel />,
+  notifications: OpenNotificationsTab,
   links: LinksLibraryPanel,
   team_guard: TeamGuardPanel,
   bottleneck: BottleneckPanel,
@@ -36,6 +37,20 @@ const PANEL_MAP: Record<string, React.ComponentType> = {
   reversion_inbox: ReversionInboxPanel,
   fallback_routing: FallbackRoutingPanel,
 };
+
+/** Notifications now live in their own Assistant tab — link to it from chat. */
+function OpenNotificationsTab() {
+  const setMode = useAssistantStore((s) => s.setMode);
+  return (
+    <button
+      type="button"
+      onClick={() => setMode("notifications")}
+      className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border-muted)] bg-white px-3 py-2 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
+    >
+      <Bell size={14} /> Open the Notifications tab
+    </button>
+  );
+}
 
 export type WidgetStepState = {
   step: "reason" | "confirm" | "processing" | "done";

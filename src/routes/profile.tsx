@@ -5,7 +5,6 @@ import {
   Camera,
   Save,
   Loader2,
-  Phone,
   Target,
   Link,
   Mail,
@@ -23,6 +22,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
 import { requireAuth } from "@/lib/route-guards";
 import { initials } from "@/lib/format";
+import { parseOnboarding, BADGES } from "@/lib/onboarding-config";
+import { BadgeCircle } from "@/components/onboarding/onboarding-bits";
 
 export const Route = createFileRoute("/profile")({
   beforeLoad: requireAuth,
@@ -35,7 +36,6 @@ export const Route = createFileRoute("/profile")({
 function ProfilePage() {
   const profile = useCurrentProfile();
   const [displayName, setDisplayName] = useState("");
-  const [phone, setPhone] = useState("");
   const [crfLink, setCrfLink] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -43,7 +43,6 @@ function ProfilePage() {
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name || "");
-      setPhone(profile.phone || "");
       setCrfLink(profile.crf_link || "");
     }
   }, [profile]);
@@ -100,7 +99,6 @@ function ProfilePage() {
         .from("profiles")
         .update({
           display_name: displayName.trim(),
-          phone: phone.trim(),
           crf_link: currentProfile.role === "property_consultant" ? crfLink.trim() || null : null,
           updated_at: new Date().toISOString(),
         })
@@ -164,6 +162,7 @@ function ProfilePage() {
             <CardDescription className="text-sm font-medium text-[var(--color-text-secondary)]">
               {roleLabels[profile.role] || profile.role}
             </CardDescription>
+            <ProfileBadgeRow onboarding={(profile as { onboarding?: unknown }).onboarding} />
           </CardHeader>
           <CardContent className="border-t border-[var(--color-border)] pt-4 space-y-3 text-sm">
             <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
@@ -199,20 +198,6 @@ function ProfilePage() {
                     onChange={(e) => setDisplayName(e.target.value)}
                     className="pl-9 border-[var(--color-border)] focus-visible:ring-[var(--color-primary)]"
                     placeholder="Enter your name"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-2.5 h-4 w-4 text-[var(--color-text-placeholder)]" />
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="pl-9 border-[var(--color-border)] focus-visible:ring-[var(--color-primary)]"
-                    placeholder="+63 9xx xxx xxxx"
                   />
                 </div>
               </div>
@@ -297,6 +282,30 @@ function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+/** Onboarding badges earned by this user (§3.2) — small row under the avatar card. */
+function ProfileBadgeRow({ onboarding }: { onboarding: unknown }) {
+  const state = parseOnboarding(onboarding);
+  if (!state || state.badges.length === 0) return null;
+  return (
+    <div className="mt-3 flex flex-wrap justify-center gap-2">
+      {state.badges
+        .filter((id) => BADGES[id])
+        .map((id) => (
+          <span
+            key={id}
+            className="flex flex-col items-center gap-1"
+            title={BADGES[id].description}
+          >
+            <BadgeCircle badgeId={id} />
+            <span className="text-[10px] font-medium text-[var(--color-text-secondary)]">
+              {BADGES[id].name}
+            </span>
+          </span>
+        ))}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useCurrentProfile } from "@/stores/auth-store";
-import { NotificationBell } from "./notification-bell";
 import { ProfileMenu } from "./profile-menu";
 import { initials } from "@/lib/format";
 
@@ -26,7 +25,6 @@ export function TopBar({ title }: { title: string }) {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-1 relative">
-        <NotificationBell />
         <button
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Open profile menu"

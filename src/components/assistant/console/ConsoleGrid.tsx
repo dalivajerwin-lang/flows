@@ -4,7 +4,6 @@ import { DailyAgendaPanel } from "./panels/DailyAgendaPanel";
 import { ExpiryWarningsPanel } from "./panels/ExpiryWarningsPanel";
 import { StagnantLeadsPanel } from "./panels/StagnantLeadsPanel";
 import { GoalTrackerPanel } from "./panels/GoalTrackerPanel";
-import { NotificationCenterPanel } from "./panels/NotificationCenterPanel";
 import { LinksLibraryPanel } from "./panels/LinksLibraryPanel";
 import { TeamGuardPanel } from "./panels/TeamGuardPanel";
 import { BottleneckPanel } from "./panels/BottleneckPanel";
@@ -32,7 +31,6 @@ export function ConsoleGrid({
           <TeamGuardPanel />
           <BottleneckPanel />
           <GoalPaceCalculatorPanel />
-          <NotificationCenterPanel highlight={highlightPanel === "notifications"} />
           <LinksLibraryAdminPanel />
           <ProjectAdminPanel />
           <ReversionInboxPanel />
@@ -44,12 +42,14 @@ export function ConsoleGrid({
           <ExpiryWarningsPanel />
           <StagnantLeadsPanel />
           <GoalTrackerPanel />
-          <NotificationCenterPanel highlight={highlightPanel === "notifications"} />
           <LinksLibraryPanel />
         </>
       )}
-      {/* Silence unused role */}
-      <span className="hidden">{role}</span>
+      {/* Silence unused props (highlightPanel kept for future panel deep-links) */}
+      <span className="hidden">
+        {role}
+        {highlightPanel}
+      </span>
     </div>
   );
 }

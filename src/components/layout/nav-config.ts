@@ -10,6 +10,8 @@ import {
   Calculator,
   UsersRound,
   BarChart3,
+  ShieldCheck,
+  Building,
 } from "lucide-react";
 
 export interface NavItem {
@@ -38,6 +40,7 @@ export const managerSidebar: NavItem[] = [
   { to: "/workflow", label: "Workflow", icon: KanbanSquare },
   { to: "/schedule", label: "Schedule", icon: Calendar },
   { to: "/team", label: "Team", icon: UsersRound, managerOnly: true },
+  { to: "/projects-admin", label: "Projects", icon: Building, managerOnly: true },
   { to: "/reports", label: "Reports", icon: BarChart3, managerOnly: true },
   { to: "/assistant", label: "Assistant", icon: Bot, showBadge: true },
   { to: "/projects", label: "Projects Computation", icon: Calculator },
@@ -60,7 +63,12 @@ export const managerBottom: NavItem[] = [
 ];
 
 export function sidebarFor(role: Role): NavItem[] {
-  return role === "property_consultant" ? consultantSidebar : managerSidebar;
+  if (role === "property_consultant") return consultantSidebar;
+  if (role === "superadmin") {
+    // Superadmin = manager nav + the admin console at the top.
+    return [{ to: "/admin", label: "Admin", icon: ShieldCheck }, ...managerSidebar];
+  }
+  return managerSidebar;
 }
 
 export function bottomNavFor(role: Role): NavItem[] {
@@ -68,4 +76,4 @@ export function bottomNavFor(role: Role): NavItem[] {
 }
 
 // /reports is accessible to both roles; consultants see only their own data.
-export const managerOnlyPaths = new Set<string>(["/team"]);
+export const managerOnlyPaths = new Set<string>(["/team", "/projects-admin"]);

@@ -463,7 +463,10 @@ function TeamPage() {
                   className="w-full h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 >
                   <option value="property_consultant">Property Consultant</option>
-                  <option value="manager">Manager</option>
+                  {/* Only the superadmin can create managers (enforced by RLS too). */}
+                  {currentProfile?.role === "superadmin" && (
+                    <option value="manager">Manager</option>
+                  )}
                 </select>
               </Field>
 

@@ -649,7 +649,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
               <li key={a.id}>
                 <span className="text-[var(--color-text)]">{a.summary}</span>
                 {" — "}
-                {profilesById[a.actor_id]?.display_name ?? "System"} ·{" "}
+                {(a.actor_id ? profilesById[a.actor_id]?.display_name : undefined) ?? "System"} ·{" "}
                 {format(new Date(a.created_at), "MMM d, HH:mm")}
               </li>
             ))}
