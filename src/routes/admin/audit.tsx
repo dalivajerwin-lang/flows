@@ -32,9 +32,9 @@ const TYPE_FAMILIES = [
 ];
 
 const SEVERITY_STYLES: Record<string, string> = {
-  info: "bg-slate-100 text-slate-700",
-  warning: "bg-amber-100 text-amber-800",
-  critical: "bg-red-100 text-red-800",
+  info: "bg-[var(--color-chip-inactive-bg)] text-[var(--color-chip-inactive-fg)]",
+  warning: "bg-[var(--color-chip-warning-bg)] text-[var(--color-chip-warning-fg)]",
+  critical: "bg-[var(--color-chip-critical-bg)] text-[var(--color-chip-critical-fg)]",
 };
 
 function AuditLogPage() {
@@ -76,7 +76,7 @@ function AuditLogPage() {
   };
 
   const selectClass =
-    "h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]";
+    "h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]";
 
   return (
     <div className="space-y-6">
@@ -160,7 +160,7 @@ function AuditLogPage() {
           Loading audit log...
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm">
+        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>

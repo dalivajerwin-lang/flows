@@ -64,7 +64,7 @@ export function StepPipelineTour({ onReachedEnd }: { onReachedEnd: () => void })
   const stage = TOUR_STAGES[pos];
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
       <h2 className="text-center text-[22px] font-bold text-[var(--color-text)] sm:text-2xl">
         How money moves
       </h2>
@@ -85,7 +85,7 @@ export function StepPipelineTour({ onReachedEnd }: { onReachedEnd: () => void })
               <div key={s} className="flex w-14 flex-col items-center sm:w-20">
                 <span
                   className={cn(
-                    "z-10 h-5 w-5 rounded-full border-2 bg-white transition-tenacious",
+                    "z-10 h-5 w-5 rounded-full border-2 bg-[var(--color-background)] transition-tenacious",
                     i <= pos
                       ? "border-[var(--color-primary)] bg-[var(--color-primary)]"
                       : "border-[var(--color-border)]",
@@ -112,7 +112,7 @@ export function StepPipelineTour({ onReachedEnd }: { onReachedEnd: () => void })
             disabled={atEnd}
             aria-label={atEnd ? "Pipeline complete" : "Advance client to next stage"}
             className={cn(
-              "onb-chip-slide absolute -top-9 z-20 grid h-8 w-8 -translate-x-1/2 place-items-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_0_0_5px_rgba(6,148,148,0.2)]",
+              "onb-chip-slide absolute -top-9 z-20 grid h-8 w-8 -translate-x-1/2 place-items-center rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-[0_0_0_5px_rgba(6,148,148,0.2)]",
               !atEnd && "cursor-pointer active:scale-[0.9]",
             )}
             style={{ left: `calc(12px + (100% - 24px) * ${pos / (TOUR_STAGES.length - 1)})` }}

@@ -26,7 +26,7 @@ export function PanelCard({
     <section
       id={id}
       className={cn(
-        "rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white shadow-sm",
+        "rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm",
         className,
       )}
     >

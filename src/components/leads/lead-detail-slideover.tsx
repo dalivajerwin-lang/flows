@@ -82,7 +82,7 @@ export function LeadDetailSlideOver({
   if (!isDesktop && open) {
     // Render full-screen overlay via a simple wrapper
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-white">
+      <div className="fixed inset-0 z-50 flex flex-col bg-[var(--color-background)]">
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
           <h2 className="text-lg font-semibold">Lead Detail</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -472,7 +472,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
                   type="date"
                   value={logDate}
                   onChange={(e) => setLogDate(e.target.value)}
-                  className="mt-1 h-8 text-sm bg-white"
+                  className="mt-1 h-8 text-sm bg-[var(--color-background)]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-1">
@@ -482,7 +482,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
                     type="time"
                     value={logStart}
                     onChange={(e) => setLogStart(e.target.value)}
-                    className="mt-1 h-8 text-sm bg-white"
+                    className="mt-1 h-8 text-sm bg-[var(--color-background)]"
                   />
                 </div>
                 <div>
@@ -491,7 +491,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
                     type="time"
                     value={logEnd}
                     onChange={(e) => setLogEnd(e.target.value)}
-                    className="mt-1 h-8 text-sm bg-white"
+                    className="mt-1 h-8 text-sm bg-[var(--color-background)]"
                   />
                 </div>
               </div>
@@ -503,7 +503,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
                 placeholder="Log notes about the session..."
                 value={logNotes}
                 onChange={(e) => setLogNotes(e.target.value.slice(0, 1000))}
-                className="mt-1 bg-white text-sm"
+                className="mt-1 bg-[var(--color-background)] text-sm"
                 rows={2}
               />
             </div>
@@ -521,7 +521,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
           {engagements.map((e: any) => (
             <li
               key={e.id}
-              className="rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3 space-y-1 bg-white"
+              className="rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3 space-y-1 bg-[var(--color-background)]"
             >
               <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                 <span className="font-semibold text-[var(--color-primary-hover)]">

@@ -158,7 +158,7 @@ export function OnboardingShell({
       {/* Docked footer: Back / Continue + progress bar + XP (§2.3). */}
       <footer
         className={cn(
-          "fixed inset-x-0 bottom-0 z-20 border-t border-[var(--color-border)] bg-white/95 backdrop-blur transition-tenacious",
+          "fixed inset-x-0 bottom-0 z-20 border-t border-[var(--color-border)] bg-[var(--color-background)]/95 backdrop-blur transition-tenacious",
           keyboardOpen && "translate-y-full opacity-0",
         )}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}

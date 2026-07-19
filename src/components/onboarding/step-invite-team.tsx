@@ -60,7 +60,7 @@ export function StepInviteTeam({ onInvitesChanged }: { onInvitesChanged: (n: num
   }
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
       <h2 className="text-center text-[22px] font-bold text-[var(--color-text)] sm:text-2xl">
         Invite your team
       </h2>
@@ -166,7 +166,7 @@ function TeamInviteCard({ invite, canShare }: { invite: Invite; canShare: boolea
   }
 
   return (
-    <div className="onb-card-settle flex w-32 shrink-0 flex-col items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]">
+    <div className="onb-card-settle flex w-32 shrink-0 flex-col items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-sm)]">
       <span className="grid h-12 w-12 place-items-center rounded-full bg-[var(--color-primary-light)] text-sm font-bold text-[var(--color-primary-hover)]">
         {initials(invite.name)}
       </span>

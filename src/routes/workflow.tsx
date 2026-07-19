@@ -159,7 +159,7 @@ function WorkflowPage() {
               "rounded-[var(--radius-pill)] border px-3 py-1 text-xs",
               ui.boardFilter === f
                 ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-hover)]"
-                : "border-[var(--color-border)] bg-white text-[var(--color-text-secondary)]",
+                : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-text-secondary)]",
             )}
           >
             {f === "week" ? "This Week" : f === "month" ? "Monthly" : "All Time"}
@@ -169,7 +169,7 @@ function WorkflowPage() {
           <select
             value={ui.boardConsultantFilter}
             onChange={(e) => ui.setBoardConsultantFilter(e.target.value)}
-            className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-2 py-1 text-xs"
+            className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-2 py-1 text-xs"
           >
             <option value="">All consultants</option>
             {consultants.map((c) => (
@@ -288,7 +288,7 @@ function Column({
         "xl:w-auto",
       )}
     >
-      <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-[var(--radius-md)] border-b border-[var(--color-border)] bg-white/95 px-3 py-2 backdrop-blur">
+      <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-[var(--radius-md)] border-b border-[var(--color-border)] bg-[var(--color-background)]/95 px-3 py-2 backdrop-blur">
         <span className="text-sm font-semibold">{STAGE_LABELS[stage]}</span>
         <span className="rounded-[var(--radius-pill)] bg-[var(--color-surface)] px-2 py-0.5 text-xs text-[var(--color-text-secondary)]">
           {leads.length}
@@ -364,7 +364,7 @@ function BoardCard({ lead, onOpen }: { lead: Lead; onOpen: (id: string) => void 
       <button
         {...longPressHandlers}
         className={cn(
-          "w-full rounded-[var(--radius-md)] border bg-white p-3 text-left transition-tenacious hover:shadow-[var(--shadow-sm)] select-none",
+          "w-full rounded-[var(--radius-md)] border bg-[var(--color-background)] p-3 text-left transition-tenacious hover:shadow-[var(--shadow-sm)] select-none",
           "touch-manipulation",
           urgent && "border-[var(--color-error)]",
           !urgent &&
@@ -577,7 +577,7 @@ function LeadContextMenu({
       {/* Scrim */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]",
+          "fixed inset-0 z-40 bg-[var(--color-overlay)] backdrop-blur-[2px]",
           transitionTo && "hidden",
         )}
         onClick={onClose}
@@ -587,7 +587,7 @@ function LeadContextMenu({
       {/* Bottom Sheet */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white shadow-2xl animate-in slide-in-from-bottom-4 duration-200",
+          "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-[var(--color-background)] shadow-2xl animate-in slide-in-from-bottom-4 duration-200",
           transitionTo && "hidden",
         )}
       >
@@ -666,7 +666,7 @@ function LeadContextMenu({
             <button
               onClick={handleSaveNote}
               disabled={!noteText.trim() || savingNote}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-3 text-sm font-semibold text-[var(--color-primary-foreground)] disabled:opacity-50 transition-all active:scale-95"
             >
               {savingNote ? <Loader2 size={15} className="animate-spin" /> : null}
               Save Note

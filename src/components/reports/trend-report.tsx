@@ -12,7 +12,7 @@ export function TrendReport({ db }: { db: DBShape }) {
   const hasData = buckets.some((b) => b.totalValue > 0);
 
   const toolbar = (
-    <div className="inline-flex rounded-[var(--radius-pill)] border border-[var(--color-border)] bg-white p-0.5 text-xs">
+    <div className="inline-flex rounded-[var(--radius-pill)] border border-[var(--color-border)] bg-[var(--color-background)] p-0.5 text-xs">
       {[3, 6].map((n) => (
         <button
           key={n}
@@ -21,7 +21,7 @@ export function TrendReport({ db }: { db: DBShape }) {
           className={cn(
             "min-h-[32px] rounded-[var(--radius-pill)] px-3 font-medium transition-tenacious",
             monthsBack === n
-              ? "bg-[var(--color-primary)] text-white"
+              ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
               : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]",
           )}
         >

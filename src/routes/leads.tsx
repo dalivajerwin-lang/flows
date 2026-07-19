@@ -176,7 +176,7 @@ function LeadsPage() {
               {visible.map((l) => (
                 <li
                   key={l.id}
-                  className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-3"
+                  className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-3"
                 >
                   <span className="truncate text-sm">{l.full_name}</span>
                   <Button

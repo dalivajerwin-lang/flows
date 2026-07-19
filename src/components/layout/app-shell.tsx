@@ -98,10 +98,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     const warm = window.sessionStorage.getItem("tenacious.warm");
     if (!warm) {
       setShowSplash(true);
+      // Keep the branding moment brief — long artificial delays read as "slow app".
       const t = setTimeout(() => {
         window.sessionStorage.setItem("tenacious.warm", "1");
         setShowSplash(false);
-      }, 1700);
+      }, 600);
       return () => clearTimeout(t);
     }
   }, [hydrate, hydrateSettings, startTicker]);
@@ -221,11 +222,41 @@ export function AppShell({ children }: { children: ReactNode }) {
  * Neutral full-screen placeholder shown on protected paths while auth state
  * is unknown (SSR pass / pre-hydration) or absent (redirecting to /login).
  * Deliberately renders no route content so nothing leaks unauthenticated.
+ *
+ * Safety net: if auth stays unresolved for ~8s (e.g. a wedged session or a
+ * profile fetch that never lands), surface a recovery action instead of
+ * spinning forever.
  */
 function AuthGate() {
+  const logout = useAuth((s) => s.logout);
+  const [stuck, setStuck] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStuck(true), 8000);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface)]">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--color-surface)]">
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
+      {stuck && (
+        <div className="flex flex-col items-center gap-2 px-6 text-center">
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            This is taking longer than expected.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              void logout().finally(() => {
+                window.location.href = "/login";
+              });
+            }}
+            className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-2 text-sm font-medium text-[var(--color-text)] shadow-sm transition-colors hover:bg-[var(--color-primary-light)]/40"
+          >
+            Back to sign in
+          </button>
+        </div>
+      )}
     </div>
   );
 }

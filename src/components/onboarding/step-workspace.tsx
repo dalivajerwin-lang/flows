@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  * PH-market suggestion chips) writing to the same team_goals storage the
  * dashboard uses. Card 2: read-only projects sanity check via useProjects().
  */
-const GOAL_SUGGESTIONS = [5_000_000, 10_000_000, 20_000_000];
+const GOAL_SUGGESTIONS = [50_000_000, 100_000_000, 500_000_000];
 
 export function StepWorkspace({ onGoalSaved }: { onGoalSaved: () => void }) {
   const { db } = useDashboardData();
@@ -72,7 +72,7 @@ export function StepWorkspace({ onGoalSaved }: { onGoalSaved: () => void }) {
   return (
     <div className="space-y-4">
       {/* Card 1 — Team goal */}
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
         <div className="flex items-center gap-2">
           <Target className="h-5 w-5 text-[var(--color-primary)]" />
           <h2 className="text-lg font-bold text-[var(--color-text)]">
@@ -98,7 +98,7 @@ export function StepWorkspace({ onGoalSaved }: { onGoalSaved: () => void }) {
             }}
             onBlur={saveGoal}
             placeholder="10,000,000"
-            className="w-full min-h-[44px] rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white pl-8 pr-3 text-base tabular-nums text-[var(--color-text)] placeholder:text-[var(--color-text-placeholder)] transition-tenacious focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="w-full min-h-[44px] rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] pl-8 pr-3 text-base tabular-nums text-[var(--color-text)] placeholder:text-[var(--color-text-placeholder)] transition-tenacious focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           />
         </div>
 
@@ -131,7 +131,7 @@ export function StepWorkspace({ onGoalSaved }: { onGoalSaved: () => void }) {
       </div>
 
       {/* Card 2 — Projects sanity check (informational, §5 M2). */}
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
         <div className="flex items-center gap-2">
           <FolderOpen className="h-5 w-5 text-[var(--color-primary)]" />
           <h2 className="text-lg font-bold text-[var(--color-text)]">Your projects</h2>

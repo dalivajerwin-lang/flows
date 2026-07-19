@@ -35,7 +35,7 @@ export const Route = createFileRoute("/admin/tools")({
 });
 
 const selectClass =
-  "h-10 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]";
+  "h-10 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]";
 
 function AdminToolsPage() {
   return (
@@ -102,7 +102,7 @@ function ReassignPanel() {
   };
 
   return (
-    <div className="max-w-2xl space-y-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-sm">
+    <div className="max-w-2xl space-y-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
       <div className="flex items-center gap-2 font-semibold text-[var(--color-text)]">
         <ArrowRightLeft className="h-5 w-5 text-[var(--color-primary)]" />
         Bulk lead reassignment
@@ -179,7 +179,7 @@ function ForceStagePanel() {
   };
 
   return (
-    <div className="max-w-2xl space-y-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-sm">
+    <div className="max-w-2xl space-y-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
       <div className="font-semibold text-[var(--color-text)]">Force a stage transition</div>
       <p className="text-sm text-[var(--color-text-secondary)]">
         Bypasses the normal reversion workflow and its validations. Use only when the pipeline
@@ -245,7 +245,7 @@ function DeletedLeadsPanel() {
   const restore = useAdminRestoreLead();
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm">
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm">
       <Table>
         <TableHeader>
           <TableRow>
@@ -337,7 +337,7 @@ function ApprovalsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-sm">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
         <div className="mb-3 flex items-center gap-2 font-semibold text-[var(--color-text)]">
           <Inbox className="h-5 w-5 text-[var(--color-primary)]" />
           Pending stage reversions ({reversions.length})
@@ -388,7 +388,7 @@ function ApprovalsPanel() {
         )}
       </div>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-sm">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
         <div className="mb-3 font-semibold text-[var(--color-text)]">
           Pending CRF extensions ({extensions.length})
         </div>

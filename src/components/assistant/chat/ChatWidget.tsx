@@ -46,7 +46,7 @@ function OpenNotificationsTab() {
     <button
       type="button"
       onClick={() => setMode("notifications")}
-      className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border-muted)] bg-white px-3 py-2 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
+      className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border-muted)] bg-[var(--color-background)] px-3 py-2 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
     >
       <Bell size={14} /> Open the Notifications tab
     </button>
@@ -94,7 +94,7 @@ function PageLinkChip({ to, label }: { to: string; label: string }) {
     <button
       type="button"
       onClick={() => navigate({ to })}
-      className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border-muted)] bg-white px-3 py-2 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
+      className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-border-muted)] bg-[var(--color-background)] px-3 py-2 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
     >
       {label} <ArrowRight size={14} />
     </button>
@@ -119,7 +119,7 @@ function LeadSuggestions({ leadIds }: { leadIds: string[] }) {
           type="button"
           data-action="lead-suggestion-select"
           data-lead-id={lead.id}
-          className="flex w-full items-center justify-between gap-2 rounded-md bg-white px-2.5 py-2 text-left text-xs hover:bg-[var(--color-primary-light)]"
+          className="flex w-full items-center justify-between gap-2 rounded-md bg-[var(--color-background)] px-2.5 py-2 text-left text-xs hover:bg-[var(--color-primary-light)]"
         >
           <span className="min-w-0">
             <span className="font-semibold text-[var(--color-text)]">
@@ -222,7 +222,7 @@ function FallbackRoutingPanel() {
           type="button"
           data-action="chip"
           data-text={b.command}
-          className="rounded-lg border border-[var(--color-border-muted)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
+          className="rounded-lg border border-[var(--color-border-muted)] bg-[var(--color-background)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-colors cursor-pointer"
         >
           {b.label}
         </button>

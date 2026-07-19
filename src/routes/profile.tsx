@@ -266,7 +266,7 @@ function ProfilePage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white gap-2 font-semibold"
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-foreground)] gap-2 font-semibold"
               >
                 {saving ? (
                   <>

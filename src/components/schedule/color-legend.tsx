@@ -9,7 +9,7 @@ const LEGEND: Array<[keyof typeof APPOINTMENT_TYPE_COLORS, string]> = [
 
 export function ColorLegend() {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 py-2 text-xs text-[var(--color-text-secondary)]">
+    <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-xs text-[var(--color-text-secondary)]">
       <span className="font-medium text-[var(--color-text)]">Legend:</span>
       {LEGEND.map(([type, label]) => (
         <span key={type} className="inline-flex items-center gap-1.5">

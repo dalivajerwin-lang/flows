@@ -268,7 +268,7 @@ export function selectPendingCrfExtensions(db: DBShape) {
 
 // -------- Recent activity --------
 
-const MILESTONE_TYPES: AuditEntryType[] = [
+export const MILESTONE_TYPES: AuditEntryType[] = [
   "stage_transition",
   "closed_sale_approved",
   "closed_sale_rejected",

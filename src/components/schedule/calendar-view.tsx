@@ -59,8 +59,8 @@ export function CalendarView({ appointments }: { appointments: Appointment[] }) 
                 className={cn(
                   "px-3 py-1.5 text-sm capitalize",
                   mode === m
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "bg-white text-[var(--color-text)] hover:bg-[var(--color-surface)]",
+                    ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
+                    : "bg-[var(--color-background)] text-[var(--color-text)] hover:bg-[var(--color-surface)]",
                 )}
               >
                 {m}
@@ -198,7 +198,7 @@ function MonthGrid({
   const today = todayKeyManila();
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]">
+    <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]">
       <div className="grid grid-cols-7 border-b border-[var(--color-border)] bg-[var(--color-surface)] text-center text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
         {WEEKDAY_LABELS.map((w) => (
           <div key={w} className="py-2">
@@ -282,7 +282,7 @@ function WeekGrid({
   }, [appointments, days]);
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]">
+    <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]">
       <div className="overflow-x-auto">
         <div className="min-w-[720px]">
           {/* Header row */}

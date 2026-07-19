@@ -52,7 +52,7 @@ export function Sidebar({
           onClick={onQuickActions}
           aria-label="Add client"
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-3 py-2.5 text-sm font-semibold text-white transition-tenacious hover:bg-[var(--color-primary-hover)]",
+            "flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-3 py-2.5 text-sm font-semibold text-[var(--color-primary-foreground)] transition-tenacious hover:bg-[var(--color-primary-hover)]",
           )}
         >
           <Plus size={18} />

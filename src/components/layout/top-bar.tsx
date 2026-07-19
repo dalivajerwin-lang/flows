@@ -9,7 +9,7 @@ export function TopBar({ title }: { title: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="flex sticky top-0 z-20 h-14 items-center border-b border-[var(--color-border)] bg-white px-4 lg:px-6">
+    <header className="flex sticky top-0 z-20 h-14 items-center border-b border-[var(--color-border)] bg-[var(--color-background)] px-4 lg:px-6">
       <h1 className="text-lg font-semibold text-[var(--color-text)] lg:text-xl">{title}</h1>
       <div className="ml-6 hidden max-w-[480px] flex-1 lg:block">
         <div className="relative">

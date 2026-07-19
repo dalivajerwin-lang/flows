@@ -119,7 +119,7 @@ function ProjectsAdminPage() {
           Loading projects...
         </div>
       ) : (
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm overflow-hidden">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -144,7 +144,7 @@ function ProjectsAdminPage() {
                 projects.map((proj) => (
                   <TableRow
                     key={proj.id}
-                    className={!proj.is_active ? "opacity-60 bg-gray-50/50" : ""}
+                    className={!proj.is_active ? "opacity-60 bg-[var(--color-surface-muted)]/50" : ""}
                   >
                     <TableCell className="font-semibold text-[var(--color-text)]">
                       {proj.name}

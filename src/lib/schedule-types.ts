@@ -25,12 +25,13 @@ export const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
 };
 
 // Data-visualization tokens — used ONLY inside schedule components.
+// Values resolve via tokens.css so each theme gets a tuned variant.
 export const APPOINTMENT_TYPE_COLORS: Record<string, string> = {
-  client_tripping: "#069494",
-  online_presentation: "#3B82F6",
-  actual_presentation: "#8B5CF6",
-  manning_duty: "#D97706",
-  booth_duty: "#D97706",
+  client_tripping: "var(--color-event-tripping)",
+  online_presentation: "var(--color-event-online)",
+  actual_presentation: "var(--color-event-presentation)",
+  manning_duty: "var(--color-event-duty)",
+  booth_duty: "var(--color-event-duty)",
 };
 
 export function isClientAppointment(t: string): boolean {

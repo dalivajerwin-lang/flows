@@ -510,8 +510,8 @@ export function ChatCanvas() {
   };
 
   return (
-    <div className="relative flex h-full flex-col bg-white" onClick={onDelegatedClick}>
-      <div className="border-b border-[var(--color-border-subtle)] bg-white px-4 py-2.5 flex items-center gap-3 shadow-xs z-10 shrink-0">
+    <div className="relative flex h-full flex-col bg-[var(--color-background)]" onClick={onDelegatedClick}>
+      <div className="border-b border-[var(--color-border-subtle)] bg-[var(--color-background)] px-4 py-2.5 flex items-center gap-3 shadow-xs z-10 shrink-0">
         <AssistantAvatar priorityAlert={priorityAlert} />
         <div>
           <div className="text-sm font-bold text-[var(--color-text-strong)] flex items-center gap-1.5 leading-none">
@@ -573,7 +573,7 @@ function SuggestionChips({ role }: { role: "manager" | "superadmin" | "property_
             type="button"
             data-action="chip"
             data-text={c}
-            className="shrink-0 rounded-full border border-[var(--color-border-muted)] bg-white px-3 py-2 text-xs font-medium text-[var(--color-text-softer)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+            className="shrink-0 rounded-full border border-[var(--color-border-muted)] bg-[var(--color-background)] px-3 py-2 text-xs font-medium text-[var(--color-text-softer)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
           >
             {c}
           </button>

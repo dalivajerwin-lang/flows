@@ -46,10 +46,10 @@ export function PushPermissionPrompt() {
     <div
       role="dialog"
       aria-label="Enable notifications"
-      className="fixed inset-x-3 z-40 mx-auto flex max-w-[520px] gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:right-6 sm:left-auto"
+      className="fixed inset-x-3 z-40 mx-auto flex max-w-[520px] gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:right-6 sm:left-auto"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
     >
-      <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[var(--color-primary)] text-white">
+      <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)]">
         <Bell size={18} />
       </div>
       <div className="min-w-0 flex-1">
@@ -59,7 +59,7 @@ export function PushPermissionPrompt() {
         <div className="mt-2 flex gap-2">
           <button
             onClick={enable}
-            className="rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--color-primary-hover)]"
+            className="rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-hover)]"
           >
             Enable Notifications
           </button>

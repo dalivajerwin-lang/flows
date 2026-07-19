@@ -63,7 +63,7 @@ export function EntityPopover({ type, id, anchorRect, onDismiss }: Props) {
     <div
       ref={ref}
       className={cn(
-        "fixed z-50 w-72 rounded-[var(--radius-md)] border border-white/60 bg-white/95 p-3 shadow-lg backdrop-blur-md",
+        "fixed z-50 w-72 rounded-[var(--radius-md)] border border-white/60 bg-[var(--color-background)]/95 p-3 shadow-lg backdrop-blur-md",
         "animate-[popIn_150ms_ease-out]",
       )}
       style={pos ? { top: pos.top, left: pos.left } : { top: -9999, left: -9999 }}

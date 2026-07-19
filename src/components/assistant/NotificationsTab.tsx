@@ -131,7 +131,7 @@ function NotificationRows({
           className={cn(
             "flex min-h-[44px] w-full items-start gap-3 border-b border-[var(--color-border)] px-4 py-3 text-left last:border-b-0",
             n.is_read
-              ? "bg-white hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)]"
+              ? "bg-[var(--color-background)] hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)]"
               : "border-l-2 border-l-[var(--color-primary)] bg-[var(--color-primary-light)]/30 hover:bg-[var(--color-primary-light)]/50 active:bg-[var(--color-primary-light)]/50",
           )}
         >

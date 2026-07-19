@@ -117,18 +117,27 @@ export const useAuth = create<AuthState>((set, get) => ({
       authUserId = sessionData.user.id;
     }
 
-    // Update last login timestamp in public profiles.
+    // Fetch the profile (read-only — never gated on write RLS succeeding).
     const { data: profile } = await db
       .from("profiles")
-      .update({ last_login_at: new Date().toISOString() })
+      .select("*")
       .eq("id", authUserId)
-      .select()
       .maybeSingle();
     const typedProfile = profile as Profile | null;
 
     if (!typedProfile) {
       return { ok: false, error: "Profile record not found." };
     }
+
+    // Stamp last_login_at in the background — a slow or RLS-blocked write
+    // must never delay or fail the login itself.
+    db.from("profiles")
+      .update({ last_login_at: new Date().toISOString() })
+      .eq("id", authUserId)
+      .then(() => {})
+      .catch(() => {
+        /* non-critical */
+      });
 
     set({ userId: authUserId, profile: typedProfile, rememberMe: remember });
     return { ok: true, profile: typedProfile };
@@ -149,7 +158,12 @@ function _setupListener(set: (partial: Partial<AuthState>) => void, get: () => A
   if (_authListenerReady) return;
   _authListenerReady = true;
 
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  // IMPORTANT: the callback body must stay fully synchronous. supabase-js
+  // holds its internal auth lock while dispatching auth callbacks, and any
+  // other supabase call (including PostgREST queries, which fetch the session
+  // to attach the token) needs that same lock — awaiting one here deadlocks
+  // the client and freezes every subsequent getSession()/navigation.
+  supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_OUT") {
       clearUserData();
       set({ userId: null, profile: null });
@@ -157,14 +171,31 @@ function _setupListener(set: (partial: Partial<AuthState>) => void, get: () => A
     }
 
     const userId = session?.user?.id ?? null;
-    let profile: Profile | null = null;
+    set({ userId });
 
-    if (userId) {
-      const { data } = await db.from("profiles").select("*").eq("id", userId).maybeSingle();
-      profile = (data as Profile) ?? null;
+    if (!userId) {
+      set({ profile: null });
+      return;
     }
 
-    set({ userId, profile });
+    // Profile already cached for this user (e.g. set by login() or a prior
+    // TOKEN_REFRESHED tick) — nothing to fetch.
+    if (get().profile?.id === userId) return;
+
+    // Defer the DB fetch out of the callback (Supabase-recommended escape
+    // hatch) so it runs after the auth lock is released.
+    setTimeout(async () => {
+      try {
+        const { data } = await db.from("profiles").select("*").eq("id", userId).maybeSingle();
+        const state = get();
+        // Session changed (or login() filled the profile) while we fetched —
+        // don't clobber newer state.
+        if (state.userId !== userId || state.profile?.id === userId) return;
+        set({ profile: (data as Profile) ?? null });
+      } catch {
+        /* transient fetch failure — a later auth event or hydrate retries */
+      }
+    }, 0);
   });
 }
 

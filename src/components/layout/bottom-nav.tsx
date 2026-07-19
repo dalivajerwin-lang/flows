@@ -20,7 +20,7 @@ export function BottomNav({
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-white sm:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-background)] sm:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="relative mx-auto grid h-16 max-w-md grid-cols-5 items-stretch">

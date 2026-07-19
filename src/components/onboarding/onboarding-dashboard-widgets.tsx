@@ -76,7 +76,7 @@ export function ResumeOnboardingBanner() {
         type="button"
         aria-label="Dismiss setup reminder"
         onClick={() => persistOnboarding(profile, { ...state, resumeBannerDismissed: true })}
-        className="shrink-0 rounded-full p-1.5 text-(--color-text-secondary) transition-tenacious hover:bg-white"
+        className="shrink-0 rounded-full p-1.5 text-(--color-text-secondary) transition-tenacious hover:bg-[var(--color-background)]"
       >
         <X className="h-4 w-4" />
       </button>
@@ -109,7 +109,7 @@ export function FirstDayChecklist() {
   };
 
   return (
-    <div className="rounded-(--radius-md) border border-(--color-border) bg-white p-4 shadow-(--shadow-sm)">
+    <div className="rounded-(--radius-md) border border-(--color-border) bg-[var(--color-background)] p-4 shadow-(--shadow-sm)">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-(--color-text)">Your first day</h2>
         <button
@@ -188,7 +188,7 @@ export function OnboardingRevealOverlay() {
   return (
     <div
       aria-hidden="true"
-      className="onb-focus-reveal pointer-events-none fixed inset-0 z-40 bg-white/30"
+      className="onb-focus-reveal pointer-events-none fixed inset-0 z-40 bg-[var(--color-background)]/30"
     />
   );
 }

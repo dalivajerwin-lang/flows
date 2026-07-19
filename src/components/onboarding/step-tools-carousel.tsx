@@ -112,7 +112,7 @@ export function StepToolsCarousel({
   }, [seen]);
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
       <h2 className="text-center text-[22px] font-bold text-[var(--color-text)] sm:text-2xl">
         {title}
       </h2>
@@ -181,11 +181,11 @@ function SchedulePreview() {
       {days.map((d, i) => (
         <div key={i} className="flex flex-1 flex-col items-center gap-1">
           {i === 2 ? (
-            <span className="w-full truncate rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-1 py-1 text-center text-[9px] font-semibold text-white">
+            <span className="w-full truncate rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-1 py-1 text-center text-[9px] font-semibold text-[var(--color-primary-foreground)]">
               Tripping
             </span>
           ) : (
-            <span className="h-[22px] w-full rounded-[var(--radius-sm)] bg-white" />
+            <span className="h-[22px] w-full rounded-[var(--radius-sm)] bg-[var(--color-background)]" />
           )}
           <span className="text-[10px] text-[var(--color-text-secondary)]">{d}</span>
         </div>
@@ -196,7 +196,7 @@ function SchedulePreview() {
 
 function AssistantPreview() {
   return (
-    <div className="rounded-[var(--radius-md)] bg-white p-3">
+    <div className="rounded-[var(--radius-md)] bg-[var(--color-background)] p-3">
       <span className="text-xs text-[var(--color-text-secondary)]">Try asking:</span>
       <p className="mt-1 rounded-[var(--radius-sm)] bg-[var(--color-primary-light)] px-3 py-2 text-sm font-medium text-[var(--color-primary-hover)]">
         "Summarize my stagnant leads"
@@ -236,7 +236,7 @@ function PendingActionsPreview() {
       {["Closed sale awaiting verification", "Reservation expiry escalated"].map((t) => (
         <div
           key={t}
-          className="flex items-center gap-2 rounded-[var(--radius-sm)] bg-white px-3 py-2 text-xs text-[var(--color-text)]"
+          className="flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-background)] px-3 py-2 text-xs text-[var(--color-text)]"
         >
           <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-warning)]" />
           {t}
@@ -248,7 +248,7 @@ function PendingActionsPreview() {
 
 function ReportsPreview() {
   return (
-    <div className="flex items-end justify-between gap-1.5 rounded-[var(--radius-md)] bg-white p-3">
+    <div className="flex items-end justify-between gap-1.5 rounded-[var(--radius-md)] bg-[var(--color-background)] p-3">
       {[30, 45, 28, 52, 38, 60].map((h, i) => (
         <div
           key={i}
@@ -265,7 +265,7 @@ function ReportsPreview() {
 
 function BroadcastPreview() {
   return (
-    <div className="rounded-[var(--radius-md)] bg-white p-3">
+    <div className="rounded-[var(--radius-md)] bg-[var(--color-background)] p-3">
       <p className="text-sm font-medium text-[var(--color-text)]">📣 Team huddle at 9 AM</p>
       <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
         Your team sees this full-screen and taps to acknowledge.

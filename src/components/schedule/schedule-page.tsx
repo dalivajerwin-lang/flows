@@ -71,8 +71,8 @@ export function SchedulePage() {
               className={cn(
                 "px-3 py-1.5 text-sm capitalize",
                 view === m
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-white text-[var(--color-text)] hover:bg-[var(--color-surface)]",
+                  ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
+                  : "bg-[var(--color-background)] text-[var(--color-text)] hover:bg-[var(--color-surface)]",
               )}
             >
               {m}
@@ -94,7 +94,7 @@ export function SchedulePage() {
                 "flex-1 px-3 py-1.5 text-sm",
                 subsystem === k
                   ? "bg-[var(--color-primary-light)] text-[var(--color-primary-hover)] font-semibold"
-                  : "bg-white text-[var(--color-text)] hover:bg-[var(--color-surface)]",
+                  : "bg-[var(--color-background)] text-[var(--color-text)] hover:bg-[var(--color-surface)]",
               )}
             >
               {label}
