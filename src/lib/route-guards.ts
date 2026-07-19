@@ -17,6 +17,11 @@ import { supabase, db } from "@/lib/supabase";
 import { useAuth, type Profile } from "@/stores/auth-store";
 
 async function getSessionUserId(): Promise<string | null> {
+  // Prefer the hydrated auth store: it is kept in sync by onAuthStateChange
+  // (SIGNED_OUT clears it), and skipping getSession() here avoids taking the
+  // supabase auth lock on every route transition.
+  const cached = useAuth.getState();
+  if (cached.hydrated) return cached.userId;
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -20,7 +20,7 @@ export function ReportCard({
   return (
     <section
       className={cn(
-        "rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]",
+        "rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]",
         expanded && "col-span-full",
       )}
     >

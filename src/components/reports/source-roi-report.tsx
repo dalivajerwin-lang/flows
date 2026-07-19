@@ -22,7 +22,7 @@ export function SourceRoiReport({ db }: { db: DBShape }) {
       <select
         value={consultantId}
         onChange={(e) => setConsultantId(e.target.value)}
-        className="min-h-[32px] rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-2 text-xs"
+        className="min-h-[32px] rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-2 text-xs"
       >
         <option value="">All consultants</option>
         {consultants.map((c) => (

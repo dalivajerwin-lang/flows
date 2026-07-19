@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth-store";
+import { useSettings, type Theme } from "@/stores/settings-store";
 import { useSystemSettings, useUpdateSystemSettings } from "@/hooks/use-registration-tokens";
 import { Button } from "@/components/ui/tenacious-button";
 import { Field, TenaciousInput } from "@/components/ui/form-controls";
@@ -10,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/lib/supabase";
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
 import { requireAuth } from "@/lib/route-guards";
-import { ShieldAlert, KeyRound, Settings, Save } from "lucide-react";
+import { ShieldAlert, KeyRound, Settings, Save, Sun, Moon, Monitor } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: requireAuth,
@@ -105,8 +106,16 @@ function SettingsPage() {
         </TabsList>
 
         {/* --- My Account Tab --- */}
-        <TabsContent value="account" className="mt-0">
-          <div className="max-w-[480px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-sm">
+        <TabsContent value="account" className="mt-0 space-y-6">
+          <div className="max-w-[480px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-[var(--color-text)] mb-1">Appearance</h2>
+            <p className="text-xs text-[var(--color-text-secondary)] mb-6">
+              Choose how Tenacious looks on this device.
+            </p>
+            <ThemeSelector />
+          </div>
+
+          <div className="max-w-[480px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[var(--color-text)] mb-1">Update Password</h2>
             <p className="text-xs text-[var(--color-text-secondary)] mb-6">
               Change the password you use to log in to your Tenacious account.
@@ -154,7 +163,7 @@ function SettingsPage() {
         {/* --- System Tab --- */}
         {isSuperadmin && (
           <TabsContent value="system" className="mt-0">
-            <div className="max-w-[540px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-sm space-y-6">
+            <div className="max-w-[540px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm space-y-6">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--color-text)]">
                   Global Security Rules
@@ -170,13 +179,13 @@ function SettingsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-start justify-between rounded-[var(--radius-md)] border border-red-100 bg-red-50/50 p-4 gap-4">
+                  <div className="flex items-start justify-between rounded-[var(--radius-md)] border border-[var(--color-danger-soft-border)] bg-[var(--color-danger-soft-bg)] p-4 gap-4">
                     <div className="space-y-1">
-                      <div className="font-semibold text-red-950 flex items-center gap-2">
+                      <div className="font-semibold text-[var(--color-danger-soft-fg)] flex items-center gap-2">
                         <ShieldAlert className="h-4 w-4 text-[var(--color-error)]" />
                         Lock User Registration
                       </div>
-                      <p className="text-xs text-red-900 leading-relaxed">
+                      <p className="text-xs text-[var(--color-danger-soft-fg)] leading-relaxed">
                         When enabled, all registration tokens are immediately locked. New users will
                         be blocked from registering accounts, even if they have valid token links.
                       </p>
@@ -209,6 +218,44 @@ function SettingsPage() {
           </TabsContent>
         )}
       </Tabs>
+    </div>
+  );
+}
+
+const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
+];
+
+function ThemeSelector() {
+  const theme = useSettings((s) => s.theme);
+  const setTheme = useSettings((s) => s.setTheme);
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Theme"
+      className="grid grid-cols-3 gap-1 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] p-1"
+    >
+      {THEME_OPTIONS.map(({ value, label, icon: Icon }) => {
+        const active = theme === value;
+        return (
+          <button
+            key={value}
+            role="radio"
+            aria-checked={active}
+            onClick={() => setTheme(value)}
+            className={`flex items-center justify-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium transition-tenacious ${
+              active
+                ? "bg-[var(--color-background)] text-[var(--color-text)] shadow-[var(--shadow-sm)]"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+            }`}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

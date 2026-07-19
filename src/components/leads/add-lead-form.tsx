@@ -165,7 +165,7 @@ export function AddLeadForm({
                   "min-h-[36px] rounded-[var(--radius-pill)] border px-3 text-sm transition-tenacious",
                   active
                     ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-hover)]"
-                    : "border-[var(--color-border)] bg-white text-[var(--color-text)] hover:bg-[var(--color-surface)]",
+                    : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-text)] hover:bg-[var(--color-surface)]",
                 )}
               >
                 {UNIT_TYPE_LABELS[u]}

@@ -168,7 +168,7 @@ function SectionCard({
   return (
     <div
       className={cn(
-        "rounded-(--radius-md) border border-(--color-border) bg-white p-4 shadow-(--shadow-sm)",
+        "rounded-(--radius-md) border border-(--color-border) bg-[var(--color-background)] p-4 shadow-(--shadow-sm)",
         className,
       )}
     >
@@ -399,7 +399,7 @@ function DashboardHeader({
   const first = profile.display_name.split(" ")[0];
 
   return (
-    <div className="sticky top-14 z-10 -mx-4 border-b border-(--color-border) bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+    <div className="sticky top-14 z-10 -mx-4 border-b border-(--color-border) bg-[var(--color-background)]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-xl font-semibold sm:text-2xl">
@@ -773,7 +773,7 @@ function HeroSummary({
           </span>
         </div>
         {showGoal ? (
-          <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-white/70">
+          <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-[var(--color-background)]/70">
             <div
               className="h-full rounded-full bg-(--color-primary) transition-[width] duration-600 ease-out"
               style={{ width: `${animPct}%` }}
@@ -862,7 +862,7 @@ function MobileCollapsible({
     return <SectionCard title={title}>{children}</SectionCard>;
   }
   return (
-    <div className="rounded-(--radius-md) border border-(--color-border) bg-white shadow-(--shadow-sm)">
+    <div className="rounded-(--radius-md) border border-(--color-border) bg-[var(--color-background)] shadow-(--shadow-sm)">
       <Accordion type="single" collapsible defaultValue={defaultOpen ? "item" : undefined}>
         <AccordionItem value="item" className="border-b-0">
           <AccordionTrigger className="px-4 text-base font-semibold">{title}</AccordionTrigger>
@@ -907,7 +907,7 @@ function SummaryCards({
               search: c.stage === "all" ? {} : { stage: c.stage },
             })
           }
-          className="rounded-(--radius-md) border border-(--color-border) bg-white p-3.5 text-left shadow-(--shadow-sm) transition-tenacious hover:border-(--color-primary) active:scale-[0.98]"
+          className="rounded-(--radius-md) border border-(--color-border) bg-[var(--color-background)] p-3.5 text-left shadow-(--shadow-sm) transition-tenacious hover:border-(--color-primary) active:scale-[0.98]"
         >
           <div className="text-xl font-semibold leading-tight text-(--color-text) tabular-nums">
             {c.value}

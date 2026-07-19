@@ -83,7 +83,7 @@ export function DayDetailPanel({
       <div className="fixed inset-0 z-40" onClick={onClose}>
         <div className="absolute inset-0 bg-[rgba(0,0,0,0.32)]" />
         <div
-          className="absolute right-6 top-24 w-[360px] rounded-[var(--radius-md)] bg-white shadow-[var(--shadow-md)]"
+          className="absolute right-6 top-24 w-[360px] rounded-[var(--radius-md)] bg-[var(--color-background)] shadow-[var(--shadow-md)]"
           onClick={(e) => e.stopPropagation()}
         >
           {content}
@@ -96,7 +96,7 @@ export function DayDetailPanel({
       <div className="absolute inset-0 bg-[rgba(0,0,0,0.32)]" />
       <div
         className={cn(
-          "relative mt-auto w-full rounded-t-[var(--radius-lg)] bg-white shadow-[var(--shadow-md)]",
+          "relative mt-auto w-full rounded-t-[var(--radius-lg)] bg-[var(--color-background)] shadow-[var(--shadow-md)]",
         )}
         onClick={(e) => e.stopPropagation()}
       >

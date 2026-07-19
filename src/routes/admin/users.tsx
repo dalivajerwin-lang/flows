@@ -156,7 +156,7 @@ function AdminUsersPage() {
               Loading users...
             </div>
           ) : (
-            <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -173,7 +173,7 @@ function AdminUsersPage() {
                     const isSelf = p.id === me?.id;
                     const isSuper = p.role === "superadmin";
                     return (
-                      <TableRow key={p.id} className={!p.is_active ? "bg-gray-50/50 opacity-60" : ""}>
+                      <TableRow key={p.id} className={!p.is_active ? "bg-[var(--color-surface-muted)]/50 opacity-60" : ""}>
                         <TableCell>
                           <div className="font-semibold text-[var(--color-text)]">
                             {p.display_name}
@@ -191,7 +191,7 @@ function AdminUsersPage() {
                         <TableCell>
                           <Badge
                             variant="outline"
-                            className={isSuper ? "border-amber-400 bg-amber-50 capitalize" : "capitalize"}
+                            className={isSuper ? "border-[var(--color-warning-soft-border-stronger)] bg-[var(--color-warning-soft-bg)] capitalize" : "capitalize"}
                           >
                             {isSuper && <ShieldCheck className="mr-1 h-3 w-3" />}
                             {p.role.replace("_", " ")}
@@ -202,7 +202,7 @@ function AdminUsersPage() {
                             className={
                               p.is_active
                                 ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                : "bg-red-500 text-white hover:bg-red-600"
+                                : "bg-[var(--color-error)] text-white hover:brightness-95"
                             }
                           >
                             {p.is_active ? "Active" : "Deactivated"}
@@ -297,7 +297,7 @@ function AdminUsersPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  className="text-red-600 focus:text-red-600"
+                                  className="text-[var(--color-danger-soft-fg)] focus:text-[var(--color-danger-soft-fg)]"
                                   onClick={() => setDeleteTarget(p)}
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> Delete permanently...
@@ -316,7 +316,7 @@ function AdminUsersPage() {
         </TabsContent>
 
         <TabsContent value="invites" className="mt-4">
-          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm">
+          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -357,7 +357,7 @@ function AdminUsersPage() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          className="text-red-600"
+                          className="text-[var(--color-danger-soft-fg)]"
                           onClick={() =>
                             run(() => revokeToken.mutateAsync(t.id), "Invite token revoked.")
                           }
@@ -516,7 +516,7 @@ function CreateAccountDialog({
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as typeof role)}
-                className="h-10 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                className="h-10 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               >
                 <option value="property_consultant">Property Consultant</option>
                 <option value="manager">Manager</option>

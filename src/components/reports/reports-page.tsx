@@ -21,9 +21,16 @@ export function ReportsPage() {
   const { data: appointments = [], isLoading: apptsLoading } = useAppointments();
 
   const { data: auditTrail = [], isLoading: auditLoading } = useQuery({
-    queryKey: ["audit_trail"],
+    queryKey: ["audit_trail", "reports"],
     queryFn: async () => {
-      const { data, error } = await db.from("audit_trail").select("*");
+      // Reports selectors only read stage_transition (first-CRF per lead) and
+      // note_added entries — filter server-side instead of scanning the table.
+      const { data, error } = await db
+        .from("audit_trail")
+        .select("*")
+        .in("type", ["stage_transition", "note_added"])
+        .order("created_at", { ascending: false })
+        .limit(5000);
       if (error) throw error;
       return data;
     },

@@ -18,6 +18,8 @@ import { ResponsiveDialog, SlideOver } from "@/components/ui/responsive-dialog";
 import { useState } from "react";
 import { toast } from "sonner";
 import { STAGES } from "@/lib/constants";
+import { useSettings, type Theme } from "@/stores/settings-store";
+import { Sun, Moon, Monitor } from "lucide-react";
 
 import { RouteErrorBoundary, RouteNotFoundBoundary } from "@/lib/route-boundaries";
 import { requireAuth } from "@/lib/route-guards";
@@ -30,21 +32,52 @@ export const Route = createFileRoute("/styleguide")({
   notFoundComponent: RouteNotFoundBoundary,
 });
 
-const swatches: Array<[string, string]> = [
-  ["primary", "#069494"],
-  ["primary-hover", "#047A7A"],
-  ["primary-light", "#D9F3F3"],
-  ["background", "#FFFFFF"],
-  ["surface", "#F9FAFB"],
-  ["border", "#E5E7EB"],
-  ["text", "#111827"],
-  ["text-secondary", "#6B7280"],
-  ["text-placeholder", "#9CA3AF"],
-  ["success", "#16A34A"],
-  ["warning", "#D97706"],
-  ["error", "#DC2626"],
-  ["sidebar", "#111827"],
+// Swatches render live via var() so they reflect the active theme.
+const swatches: string[] = [
+  "primary",
+  "primary-hover",
+  "primary-light",
+  "background",
+  "surface",
+  "border",
+  "text",
+  "text-secondary",
+  "text-placeholder",
+  "success",
+  "warning",
+  "error",
+  "sidebar",
 ];
+
+const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
+];
+
+function ThemeSwitcher() {
+  const theme = useSettings((s) => s.theme);
+  const setTheme = useSettings((s) => s.setTheme);
+  return (
+    <div className="inline-flex gap-1 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] p-1">
+      {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          aria-pressed={theme === value}
+          className={`flex items-center gap-1.5 rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-medium transition-tenacious ${
+            theme === value
+              ? "bg-[var(--color-background)] text-[var(--color-text)] shadow-[var(--shadow-sm)]"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+          }`}
+        >
+          <Icon className="h-3.5 w-3.5" />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function Styleguide() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -54,26 +87,29 @@ function Styleguide() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 sm:px-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-semibold">Styleguide</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          Visual QA reference. Every color in the app must come from these tokens.
-        </p>
+      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold">Styleguide</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+            Visual QA reference. Every color in the app must come from these tokens.
+          </p>
+        </div>
+        <ThemeSwitcher />
       </header>
 
       <Section title="Color tokens">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {swatches.map(([name, hex]) => (
+          {swatches.map((name) => (
             <div
               key={name}
               className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3"
             >
               <div
                 className="h-14 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)]"
-                style={{ background: hex }}
+                style={{ background: `var(--color-${name})` }}
               />
               <div className="mt-2 text-xs font-semibold">{name}</div>
-              <div className="text-xs text-[var(--color-text-secondary)]">{hex}</div>
+              <div className="text-xs text-[var(--color-text-secondary)]">{`var(--color-${name})`}</div>
             </div>
           ))}
         </div>
@@ -167,7 +203,7 @@ function Styleguide() {
 
       <Section title="Empty & error states">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)]">
             <EmptyState
               headline="No leads yet"
               description="Once a lead is added, it'll show up here."
@@ -175,7 +211,7 @@ function Styleguide() {
               onAction={() => toast("Coming in a later phase")}
             />
           </div>
-          <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)]">
             <ErrorState message="We couldn't reach the server." onRetry={() => toast("Retrying")} />
           </div>
         </div>

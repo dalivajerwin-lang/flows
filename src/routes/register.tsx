@@ -129,8 +129,8 @@ function RegisterPage() {
   if (validationError) {
     return (
       <div className="min-h-screen bg-[var(--color-surface)] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-[420px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-[var(--color-error)] mb-4">
+        <div className="w-full max-w-[420px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-[var(--shadow-sm)] text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-danger-soft-bg)] text-[var(--color-error)] mb-4">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -166,7 +166,7 @@ function RegisterPage() {
 
         <form
           onSubmit={onSubmit}
-          className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)]"
+          className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-[var(--shadow-sm)]"
         >
           <h2 className="text-xl font-semibold text-[var(--color-text)]">Create Account</h2>
 

@@ -57,7 +57,7 @@ export function ResponsiveDialog({
         ref={panelRef}
         tabIndex={-1}
         className={cn(
-          "relative bg-white shadow-[var(--shadow-md)] transition-tenacious",
+          "relative bg-[var(--color-background)] shadow-[var(--shadow-md)] transition-tenacious",
           isDesktop
             ? cn(
                 "m-auto rounded-[var(--radius-lg)]",
@@ -132,7 +132,7 @@ export function SlideOver({
   return (
     <div className="fixed inset-0 z-40 hidden lg:flex pointer-events-none">
       <div
-        className="ml-auto h-full w-[640px] bg-white shadow-[var(--shadow-lg)] overflow-auto pointer-events-auto"
+        className="ml-auto h-full w-[640px] bg-[var(--color-background)] shadow-[var(--shadow-lg)] overflow-auto pointer-events-auto"
         role="dialog"
         aria-modal="true"
         aria-label={title}

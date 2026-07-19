@@ -244,7 +244,7 @@ export function AppointmentFormDialog({
                 </button>
               )}
             </Label>
-            <div className="border border-[var(--color-border)] rounded-[var(--radius-sm)] p-3 max-h-[160px] overflow-y-auto space-y-2.5 bg-white">
+            <div className="border border-[var(--color-border)] rounded-[var(--radius-sm)] p-3 max-h-[160px] overflow-y-auto space-y-2.5 bg-[var(--color-background)]">
               {consultants.map((c) => {
                 const isChecked = state.consultant_ids.includes(c.id);
                 return (
@@ -333,7 +333,7 @@ export function AppointmentFormDialog({
                       "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs transition-all duration-200 border",
                       isSelected
                         ? "bg-[var(--color-primary-light)] text-[var(--color-primary-hover)] border-[var(--color-primary-hover)] font-semibold shadow-sm"
-                        : "bg-white text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]",
+                        : "bg-[var(--color-background)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]",
                     )}
                   >
                     {booth}

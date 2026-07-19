@@ -118,7 +118,7 @@ export function SmartExportModal({
                     key={k}
                     type="button"
                     onClick={() => setPeriodKind(k)}
-                    className={`min-h-[32px] flex-1 rounded-[var(--radius-sm)] border px-2 text-xs font-medium ${periodKind === k ? "border-[var(--color-primary)] bg-[var(--color-primary-light)]" : "border-[var(--color-border)] bg-white"}`}
+                    className={`min-h-[32px] flex-1 rounded-[var(--radius-sm)] border px-2 text-xs font-medium ${periodKind === k ? "border-[var(--color-primary)] bg-[var(--color-primary-light)]" : "border-[var(--color-border)] bg-[var(--color-background)]"}`}
                   >
                     {k === "week" ? "This Week" : k === "month" ? "Monthly" : "All Time"}
                   </button>

@@ -182,7 +182,7 @@ function LoginPage() {
       {/* ===== Form panel ===== */}
       <div className="relative z-10 -mt-14 flex flex-1 items-start justify-center px-4 pb-10 lg:mt-0 lg:items-center lg:px-8 lg:py-10">
         <div className="w-full max-w-[400px]">
-          <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-lg)] sm:p-8 lg:shadow-[var(--shadow-md)]">
+          <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-[var(--shadow-lg)] sm:p-8 lg:shadow-[var(--shadow-md)]">
             <div className="mb-6">
               <h2 className="text-2xl font-bold tracking-tight text-[var(--color-text)]">
                 Welcome back
@@ -305,7 +305,7 @@ function InstallAppPrompt() {
   if (installed) return null;
 
   return (
-    <div className="mt-4 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]">
+    <div className="mt-4 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]">
       <button
         type="button"
         onClick={() => {

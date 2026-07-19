@@ -6,9 +6,10 @@ type Variant = "primary" | "secondary" | "ghost" | "success" | "destructive" | "
 type Size = "default" | "sm";
 
 const variantStyles: Record<Variant, string> = {
-  primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]",
+  primary:
+    "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-hover)]",
   secondary:
-    "bg-white text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]",
+    "bg-[var(--color-background)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface)]",
   ghost: "bg-transparent text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]",
   success: "bg-[var(--color-success)] text-white hover:brightness-95",
   destructive: "bg-[var(--color-error)] text-white hover:brightness-95",

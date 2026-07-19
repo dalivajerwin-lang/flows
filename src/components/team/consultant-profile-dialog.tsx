@@ -95,7 +95,7 @@ export function ConsultantProfileDialog({
               className={
                 profile.is_active
                   ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                  : "bg-red-500 hover:bg-red-600 text-white"
+                  : "bg-[var(--color-error)] hover:brightness-95 text-white"
               }
             >
               {profile.is_active ? "Active" : "Deactivated"}

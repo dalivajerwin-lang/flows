@@ -65,7 +65,7 @@ export function StepProfile({
   }
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
       <h2 className="text-center text-[22px] font-bold text-[var(--color-text)] sm:text-2xl">
         Put a face to the name
       </h2>

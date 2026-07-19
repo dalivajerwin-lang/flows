@@ -7,7 +7,9 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    // Preload route code on hover/touchstart so tab switches feel instant.
+    defaultPreload: "intent",
+    defaultPreloadStaleTime: 30 * 1000,
   });
 
   return router;

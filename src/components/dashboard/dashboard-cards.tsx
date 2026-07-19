@@ -36,7 +36,7 @@ export function HeroCard({
   return (
     <div
       className={cn(
-        "rounded-(--radius-lg) border border-(--color-border) bg-white p-5 shadow-(--shadow-sm)",
+        "rounded-(--radius-lg) border border-(--color-border) bg-[var(--color-background)] p-5 shadow-(--shadow-sm)",
         className,
       )}
     >
@@ -142,7 +142,7 @@ export function StatCard({
     </>
   );
   const base =
-    "rounded-(--radius-md) border border-(--color-border) bg-white p-3.5 shadow-(--shadow-sm)";
+    "rounded-(--radius-md) border border-(--color-border) bg-[var(--color-background)] p-3.5 shadow-(--shadow-sm)";
   if (onClick) {
     return (
       <button
@@ -191,7 +191,7 @@ export function ShortcutButton({
       className="flex w-16 shrink-0 flex-col items-center gap-1.5 text-center transition-tenacious active:scale-[0.94]"
       aria-label={label}
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-(--radius-md) border border-(--color-border) bg-white text-(--color-primary-hover) shadow-(--shadow-sm) transition-tenacious hover:bg-(--color-primary-light)">
+      <span className="flex h-12 w-12 items-center justify-center rounded-(--radius-md) border border-(--color-border) bg-[var(--color-background)] text-(--color-primary-hover) shadow-(--shadow-sm) transition-tenacious hover:bg-(--color-primary-light)">
         {icon}
       </span>
       <span className="w-full truncate text-[11px] font-medium leading-tight text-(--color-text-secondary)">

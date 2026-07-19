@@ -193,7 +193,7 @@ function TeamPage() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              className="h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
             >
               <option value="all">All Roles</option>
               <option value="manager">Managers</option>
@@ -206,7 +206,7 @@ function TeamPage() {
               Loading team roster...
             </div>
           ) : (
-            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm overflow-hidden">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -232,7 +232,7 @@ function TeamPage() {
                     filteredProfiles.map((p) => (
                       <TableRow
                         key={p.id}
-                        className={!p.is_active ? "opacity-60 bg-gray-50/50" : ""}
+                        className={!p.is_active ? "opacity-60 bg-[var(--color-surface-muted)]/50" : ""}
                       >
                         <TableCell>
                           <button
@@ -275,7 +275,7 @@ function TeamPage() {
                             className={
                               p.is_active
                                 ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                                : "bg-red-500 hover:bg-red-600 text-white"
+                                : "bg-[var(--color-error)] hover:brightness-95 text-white"
                             }
                           >
                             {p.is_active ? "Active" : "Deactivated"}
@@ -312,7 +312,7 @@ function TeamPage() {
               Loading active tokens...
             </div>
           ) : (
-            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white shadow-sm overflow-hidden">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -339,13 +339,13 @@ function TeamPage() {
                       const isExpired = new Date(t.expires_at) < new Date();
                       const isUsed = !!t.used_at;
 
-                      let statusBadge = <Badge className="bg-amber-500 text-white">Pending</Badge>;
+                      let statusBadge = <Badge className="bg-[var(--color-warning-solid)] text-white">Pending</Badge>;
                       if (isUsed) {
                         statusBadge = (
                           <Badge className="bg-emerald-500 text-white">Registered</Badge>
                         );
                       } else if (isExpired) {
-                        statusBadge = <Badge className="bg-gray-400 text-white">Expired</Badge>;
+                        statusBadge = <Badge className="bg-[var(--color-chip-inactive-bg)] text-[var(--color-chip-inactive-fg)]">Expired</Badge>;
                       }
 
                       return (
@@ -467,7 +467,7 @@ function TeamPage() {
                   id="inviteRole"
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as any)}
-                  className="w-full h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                  className="w-full h-10 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                 >
                   <option value="property_consultant">Property Consultant</option>
                   {/* Only the superadmin can create managers (enforced by RLS too). */}

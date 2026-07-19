@@ -8,7 +8,7 @@ import { useAllProfiles } from "@/hooks/use-profiles";
 import { useAppointments } from "@/hooks/use-appointments";
 import { useCurrentProfile } from "@/stores/auth-store";
 import { db as supabase } from "@/lib/supabase";
-import type { DBShape } from "@/lib/dashboard-selectors";
+import { MILESTONE_TYPES, type DBShape } from "@/lib/dashboard-selectors";
 
 export function useDashboardData() {
   const profile = useCurrentProfile();
@@ -20,9 +20,16 @@ export function useDashboardData() {
   const { data: appointments = [], isLoading: apptsLoading } = useAppointments();
 
   const { data: auditTrail = [], isLoading: auditLoading } = useQuery({
-    queryKey: ["audit_trail"],
+    queryKey: ["audit_trail", "dashboard"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("audit_trail").select("*");
+      // Dashboard only renders recent milestone activity (selectRecentActivity)
+      // — never scan the whole audit table.
+      const { data, error } = await supabase
+        .from("audit_trail")
+        .select("*")
+        .in("type", MILESTONE_TYPES)
+        .order("created_at", { ascending: false })
+        .limit(300);
       if (error) throw error;
       return data;
     },

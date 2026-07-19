@@ -12,4 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Deploy target: Netlify Functions (SSR). Overrides the cloudflare-module default.
+  // Outputs static assets to dist/ and the server function to .netlify/functions-internal/.
+  nitro: { preset: "netlify" },
 });

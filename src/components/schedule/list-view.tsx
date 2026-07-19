@@ -145,7 +145,7 @@ function ListRow({
     APPOINTMENT_TYPE_COLORS[appointment.appointment_type as keyof typeof APPOINTMENT_TYPE_COLORS];
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-3 shadow-[var(--shadow-sm)] transition-tenacious hover:shadow-[var(--shadow-md)]">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-3 shadow-[var(--shadow-sm)] transition-tenacious hover:shadow-[var(--shadow-md)]">
       <button
         type="button"
         onClick={onOpen}

@@ -15,7 +15,7 @@ export function LeadListTable({ leads, onOpen }: { leads: Lead[]; onOpen: (id: s
     [projects],
   );
   return (
-    <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white">
+    <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)]">
       <table className="w-full text-sm">
         <thead className="sticky top-0 bg-[var(--color-surface)]">
           <tr className="border-b border-[var(--color-border)]">

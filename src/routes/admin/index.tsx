@@ -129,13 +129,13 @@ function AdminDashboard() {
               title={card.hint}
               className={`rounded-[var(--radius-lg)] border p-4 shadow-sm transition-colors hover:border-[var(--color-primary)] ${
                 wrong
-                  ? "border-amber-300 bg-amber-50"
-                  : "border-[var(--color-border)] bg-white"
+                  ? "border-[var(--color-warning-soft-border)] bg-[var(--color-warning-soft-bg)]"
+                  : "border-[var(--color-border)] bg-[var(--color-background)]"
               }`}
             >
               <div className="flex items-center justify-between">
                 <Icon
-                  className={`h-4 w-4 ${wrong ? "text-amber-600" : "text-[var(--color-text-secondary)]"}`}
+                  className={`h-4 w-4 ${wrong ? "text-[var(--color-warning-soft-fg-icon)]" : "text-[var(--color-text-secondary)]"}`}
                 />
                 {wrong && <span className="h-2 w-2 rounded-full bg-amber-500" />}
               </div>
@@ -150,7 +150,7 @@ function AdminDashboard() {
 
       {/* Team pulse + quick actions */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-5 shadow-sm">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-5 shadow-sm">
           <div className="mb-3 flex items-center gap-2 font-semibold text-[var(--color-text)]">
             <Activity className="h-4 w-4 text-[var(--color-primary)]" /> Team pulse
           </div>
@@ -177,7 +177,7 @@ function AdminDashboard() {
         </div>
 
         {/* Live activity feed */}
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-5 shadow-sm lg:col-span-2">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-5 shadow-sm lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <div className="font-semibold text-[var(--color-text)]">Latest activity</div>
             <Link
@@ -198,10 +198,10 @@ function AdminDashboard() {
                   <Badge
                     className={
                       e.severity === "critical"
-                        ? "bg-red-100 text-red-800"
+                        ? "bg-[var(--color-chip-critical-bg)] text-[var(--color-chip-critical-fg)]"
                         : e.severity === "warning"
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-slate-100 text-slate-700"
+                          ? "bg-[var(--color-chip-warning-bg)] text-[var(--color-chip-warning-fg)]"
+                          : "bg-[var(--color-chip-inactive-bg)] text-[var(--color-chip-inactive-fg)]"
                     }
                   >
                     {e.severity}

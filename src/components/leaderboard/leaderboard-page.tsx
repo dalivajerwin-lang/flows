@@ -50,7 +50,7 @@ function ConsultantAvatar({
     return (
       <div
         className={cn(
-          "flex items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold text-white",
+          "flex items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold text-[var(--color-primary-foreground)]",
           className,
         )}
       >
@@ -65,7 +65,7 @@ function ConsultantAvatar({
       onClick={() => onPreview(consultant)}
       aria-label={`View ${consultant.display_name}'s profile`}
       className={cn(
-        "flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold text-white transition-tenacious hover:ring-2 hover:ring-[var(--color-primary)] hover:ring-offset-2",
+        "flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold text-[var(--color-primary-foreground)] transition-tenacious hover:ring-2 hover:ring-[var(--color-primary)] hover:ring-offset-2",
         className,
       )}
     >
@@ -110,7 +110,7 @@ export function LeaderboardPage() {
 
   if (!anyConsultants) {
     return (
-      <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-8 text-center">
+      <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-8 text-center">
         <p className="text-sm text-[var(--color-text-secondary)]">
           No consultants have been added to the team yet.
         </p>
@@ -150,7 +150,7 @@ export function LeaderboardPage() {
         </div>
         <div className="flex items-center gap-2">
           {/* Board toggle — sales is the money board, CRF is the hustle board. */}
-          <div className="flex rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white p-0.5">
+          <div className="flex rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-background)] p-0.5">
             {(
               [
                 ["sales", "🏆 Sales"],
@@ -164,7 +164,7 @@ export function LeaderboardPage() {
                 className={cn(
                   "rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-semibold transition-tenacious",
                   board === key
-                    ? "bg-[var(--color-primary)] text-white"
+                    ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                     : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]",
                 )}
               >
@@ -178,7 +178,7 @@ export function LeaderboardPage() {
 
       {board === "crf" ? (
         !hasCrfs ? (
-          <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-8 text-center text-sm text-[var(--color-text-secondary)]">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-8 text-center text-sm text-[var(--color-text-secondary)]">
             No CRFs submitted for this period yet. First CRF in takes the crown! 👑
           </div>
         ) : (
@@ -197,7 +197,7 @@ export function LeaderboardPage() {
                       "rounded-[var(--radius-md)] border p-3 text-center transition-tenacious sm:p-4",
                       isFirst
                         ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] shadow-[var(--shadow-md)] -translate-y-2"
-                        : "border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]",
+                        : "border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]",
                       isMe && !isFirst && "bg-[var(--color-primary-light)]",
                     )}
                   >
@@ -232,7 +232,7 @@ export function LeaderboardPage() {
             </div>
 
             {crfRest.length > 0 && (
-              <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white">
+              <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)]">
                 <ul>
                   {crfRest.map((r) => (
                     <CrfLeaderRow
@@ -264,7 +264,7 @@ export function LeaderboardPage() {
           </>
         )
       ) : !hasSales ? (
-        <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-8 text-center text-sm text-[var(--color-text-secondary)]">
+        <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-8 text-center text-sm text-[var(--color-text-secondary)]">
           No verified sales recorded for this period yet. Keep pushing — the board updates as soon
           as a sale is approved!
         </div>
@@ -284,7 +284,7 @@ export function LeaderboardPage() {
                     "rounded-[var(--radius-md)] border p-3 text-center transition-tenacious sm:p-4",
                     isFirst
                       ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] shadow-[var(--shadow-md)] -translate-y-2"
-                      : "border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]",
+                      : "border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-sm)]",
                     isMe && !isFirst && "bg-[var(--color-primary-light)]",
                   )}
                 >
@@ -318,7 +318,7 @@ export function LeaderboardPage() {
 
           {/* Rest of the list */}
           {rest.length > 0 && (
-            <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white">
+            <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)]">
               <ul>
                 {rest.map((r) => (
                   <LeaderRow

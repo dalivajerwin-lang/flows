@@ -19,7 +19,7 @@ export function LeadListCards({ leads, onOpen }: { leads: Lead[]; onOpen: (id: s
           <button
             type="button"
             onClick={() => onOpen(l.id)}
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-4 text-left transition-tenacious hover:bg-[var(--color-surface)]"
+            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 text-left transition-tenacious hover:bg-[var(--color-surface)]"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-start gap-3">

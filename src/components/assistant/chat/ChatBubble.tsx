@@ -61,8 +61,8 @@ export function ChatBubble({ message, entityRefs, typewriter, widgetState }: Pro
         className={cn(
           "max-w-[85%] px-4 py-3 text-sm leading-relaxed shadow-xs transition-all duration-200",
           isUser
-            ? "bg-[var(--color-primary)] text-white rounded-2xl rounded-tr-xs"
-            : "bg-white border border-[var(--color-border-subtle)] text-[var(--color-text-strong)] rounded-2xl rounded-tl-xs",
+            ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] rounded-2xl rounded-tr-xs"
+            : "bg-[var(--color-background)] border border-[var(--color-border-subtle)] text-[var(--color-text-strong)] rounded-2xl rounded-tl-xs",
         )}
       >
         <div className="whitespace-pre-wrap">
@@ -81,7 +81,7 @@ export function ChatBubble({ message, entityRefs, typewriter, widgetState }: Pro
                   s.type === "lead"
                     ? isUser
                       ? "bg-white/20 text-white border-white/30 hover:bg-white hover:text-[var(--color-primary-hover)]"
-                      : "bg-[var(--color-primary-light)] text-[var(--color-primary-hover)] border-[var(--color-primary-hover)]/20 hover:bg-[var(--color-primary)] hover:text-white"
+                      : "bg-[var(--color-primary-light)] text-[var(--color-primary-hover)] border-[var(--color-primary-hover)]/20 hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)]"
                     : isUser
                       ? "bg-white/20 text-white border-white/30 hover:bg-white hover:text-[var(--color-text-strong)]"
                       : "bg-[var(--color-surface-muted)] text-[var(--color-text-soft)] border-[var(--color-border-muted)] hover:bg-[var(--color-text-soft)] hover:text-white",

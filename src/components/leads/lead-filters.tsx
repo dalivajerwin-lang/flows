@@ -87,7 +87,7 @@ export function LeadFilters() {
                 "min-h-[32px] rounded-[var(--radius-pill)] border px-3 text-xs font-medium transition-tenacious",
                 active
                   ? "border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary-hover)]"
-                  : "border-[var(--color-border)] bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]",
+                  : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]",
               )}
             >
               {c.label}

@@ -84,7 +84,7 @@ export function StepFirstLead({ onLeadAdded }: { onLeadAdded: () => void }) {
   }
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)] sm:p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-4 shadow-[var(--shadow-md)] sm:p-6">
       <h2 className="text-center text-[22px] font-bold text-[var(--color-text)] sm:text-2xl">
         Add your first client
       </h2>
@@ -113,7 +113,7 @@ export function StepFirstLead({ onLeadAdded }: { onLeadAdded: () => void }) {
             className="w-full rounded-[var(--radius-md)] border-2 border-[var(--color-primary)] bg-[var(--color-primary-light)]/40 p-4 text-left transition-tenacious hover:bg-[var(--color-primary-light)] active:scale-[0.98]"
           >
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--color-primary)] text-white">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)]">
                 <UserPlus className="h-5 w-5" />
               </span>
               <div>

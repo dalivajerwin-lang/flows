@@ -123,7 +123,7 @@ export function FabMenu({
                   toast("Coming in a later phase", { description: action.label });
                 }
               }}
-              className="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-3 text-center text-sm font-medium text-[var(--color-text)] transition-tenacious hover:bg-[var(--color-surface)]"
+              className="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] p-3 text-center text-sm font-medium text-[var(--color-text)] transition-tenacious hover:bg-[var(--color-surface)]"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary-hover)]">
                 <Icon size={20} />

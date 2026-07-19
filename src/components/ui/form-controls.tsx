@@ -37,7 +37,7 @@ export function Field({
 }
 
 const inputBase =
-  "w-full min-h-[44px] rounded-[var(--radius-sm)] border bg-white px-3 text-base text-[var(--color-text)] " +
+  "w-full min-h-[44px] rounded-[var(--radius-sm)] border bg-[var(--color-background)] px-3 text-base text-[var(--color-text)] " +
   "placeholder:text-[var(--color-text-placeholder)] transition-tenacious " +
   "focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] " +
   "disabled:opacity-50 disabled:bg-[var(--color-surface)]";

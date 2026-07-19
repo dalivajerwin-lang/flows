@@ -33,7 +33,7 @@ export function PeriodPicker({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="inline-flex rounded-[var(--radius-pill)] border border-[var(--color-border)] bg-white p-0.5 text-xs">
+      <div className="inline-flex rounded-[var(--radius-pill)] border border-[var(--color-border)] bg-[var(--color-background)] p-0.5 text-xs">
         {(["week", "month", "all"] as const).map((k) => (
           <button
             key={k}
@@ -42,7 +42,7 @@ export function PeriodPicker({
             className={cn(
               "min-h-[32px] rounded-[var(--radius-pill)] px-3 font-medium transition-tenacious",
               kind === k
-                ? "bg-[var(--color-primary)] text-white"
+                ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]",
             )}
           >

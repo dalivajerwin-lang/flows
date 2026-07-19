@@ -89,11 +89,11 @@ export function InputRow({ onSubmit, onQueryPeople }: Props) {
 
   return (
     <div
-      className="relative border-t border-[var(--color-border-subtle)] bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] z-20 shrink-0"
+      className="relative border-t border-[var(--color-border-subtle)] bg-[var(--color-background)] px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] z-20 shrink-0"
       style={{ transform: `translateY(-${kbOffset}px)` }}
     >
       {suggestions.length > 0 && (
-        <div className="absolute bottom-full left-4 right-4 mb-2 max-h-40 overflow-y-auto rounded-xl border border-[var(--color-border-muted)] bg-white/95 backdrop-blur-md p-1.5 shadow-lg z-30">
+        <div className="absolute bottom-full left-4 right-4 mb-2 max-h-40 overflow-y-auto rounded-xl border border-[var(--color-border-muted)] bg-[var(--color-background)]/95 backdrop-blur-md p-1.5 shadow-lg z-30">
           <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-subtle)]">
             Suggested People
           </div>
@@ -125,7 +125,7 @@ export function InputRow({ onSubmit, onQueryPeople }: Props) {
           ref={inputRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="min-h-[44px] flex-1 rounded-full border border-[var(--color-border-muted)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] focus:bg-white px-4 py-2.5 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-primary)] focus:shadow-[0_0_0_3px_rgba(6,148,148,0.15)] transition-all duration-200 placeholder:text-[var(--color-text-placeholder)]"
+          className="min-h-[44px] flex-1 rounded-full border border-[var(--color-border-muted)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-subtle)] focus:bg-[var(--color-background)] px-4 py-2.5 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-primary)] focus:shadow-[0_0_0_3px_rgba(6,148,148,0.15)] transition-all duration-200 placeholder:text-[var(--color-text-placeholder)]"
           placeholder='Try "agenda", "call Anna", or "todo prep for tripping"…'
         />
         {hasMic && (
@@ -136,7 +136,7 @@ export function InputRow({ onSubmit, onQueryPeople }: Props) {
               "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-xs",
               listening
                 ? "bg-[var(--color-danger-soft-bg)] border-[var(--color-danger-soft-border)]"
-                : "bg-white border-[var(--color-border-muted)] hover:bg-[var(--color-surface)] hover:border-[var(--color-text-subtle)]",
+                : "bg-[var(--color-background)] border-[var(--color-border-muted)] hover:bg-[var(--color-surface)] hover:border-[var(--color-text-subtle)]",
             )}
             aria-label={listening ? "Stop listening" : "Start voice input"}
           >
@@ -161,7 +161,7 @@ export function InputRow({ onSubmit, onQueryPeople }: Props) {
         <button
           type="submit"
           aria-label="Send message"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-sm shadow-[var(--color-primary)]/10 disabled:opacity-50 disabled:pointer-events-none"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-hover)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-sm shadow-[var(--color-primary)]/10 disabled:opacity-50 disabled:pointer-events-none"
           disabled={!value.trim()}
         >
           <Send size={16} />

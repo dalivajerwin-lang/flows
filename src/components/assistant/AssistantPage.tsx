@@ -81,11 +81,11 @@ export function AssistantPage() {
 
   const body =
     mode === "conversational" ? (
-      <div className="h-full overflow-hidden rounded-none border-x-0 border-y sm:rounded-[var(--radius-md)] sm:border border-[var(--color-border)] bg-white shadow-none sm:shadow-sm">
+      <div className="h-full overflow-hidden rounded-none border-x-0 border-y sm:rounded-[var(--radius-md)] sm:border border-[var(--color-border)] bg-[var(--color-background)] shadow-none sm:shadow-sm">
         <ChatCanvas />
       </div>
     ) : mode === "notifications" ? (
-      <div className="h-full overflow-hidden rounded-none border-x-0 border-y sm:rounded-[var(--radius-md)] sm:border border-[var(--color-border)] bg-white shadow-none sm:shadow-sm sm:mx-auto sm:max-w-[720px]">
+      <div className="h-full overflow-hidden rounded-none border-x-0 border-y sm:rounded-[var(--radius-md)] sm:border border-[var(--color-border)] bg-[var(--color-background)] shadow-none sm:shadow-sm sm:mx-auto sm:max-w-[720px]">
         <NotificationsTab />
       </div>
     ) : (
@@ -108,7 +108,7 @@ export function AssistantPage() {
       <div className="flex items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-4 py-2 shrink-0 sm:hidden">
         <button
           onClick={() => navigate({ to: "/" })}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border-muted)] bg-white hover:bg-[var(--color-surface)] transition-all duration-150 cursor-pointer shadow-xs active:scale-95"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border-muted)] bg-[var(--color-background)] hover:bg-[var(--color-surface)] transition-all duration-150 cursor-pointer shadow-xs active:scale-95"
           aria-label="Back to home"
         >
           <ArrowLeft size={16} className="text-[var(--color-text-soft)]" />
@@ -160,8 +160,8 @@ function ModeSegment({
       className={cn(
         "relative inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 sm:px-4 text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer select-none",
         active
-          ? "bg-white text-[var(--color-primary-hover)] shadow-sm scale-102 font-bold"
-          : "text-[var(--color-text-soft)] hover:text-[var(--color-text-strong)] hover:bg-white/40",
+          ? "bg-[var(--color-background)] text-[var(--color-primary-hover)] shadow-sm scale-102 font-bold"
+          : "text-[var(--color-text-soft)] hover:text-[var(--color-text-strong)] hover:bg-[var(--color-background)]/40",
       )}
       aria-pressed={active}
     >
