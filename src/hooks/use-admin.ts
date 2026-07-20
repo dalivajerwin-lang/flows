@@ -111,6 +111,22 @@ export function useAdminRestoreLead() {
   });
 }
 
+export function useAdminPurgeTrash() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await db.rpc("admin_purge_trash");
+      if (error) throw new Error(error.message);
+      return data as number;
+    },
+    onSuccess: () => {
+      invalidateAdmin(qc);
+      // Prefix match also covers ["leads", "deleted"] (the trash panel).
+      qc.invalidateQueries({ queryKey: ["leads"] });
+    },
+  });
+}
+
 // --- admin-user-ops edge function (service-role operations) ---
 
 type UserOpAction = "revoke_sessions" | "send_reset" | "delete_user";

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { useSettings, type Theme } from "@/stores/settings-store";
-import { LogOut, Monitor, Moon, Settings, Sun, User } from "lucide-react";
+import { LogOut, Monitor, Moon, Settings, ShieldCheck, Sun, User } from "lucide-react";
 
 const THEME_CYCLE: Record<Theme, Theme> = { light: "dark", dark: "system", system: "light" };
 const THEME_LABEL: Record<Theme, string> = { light: "Light", dark: "Dark", system: "System" };
@@ -27,6 +27,17 @@ export function ProfileMenu({ onClose }: { onClose: () => void }) {
       >
         <User size={16} /> My Profile
       </Link>
+      {/* Mirror sidebarFor: the admin console must stay reachable on mobile,
+          where the sidebar (sm:flex) is hidden and the bottom nav has no slot. */}
+      {profile.role === "superadmin" && (
+        <Link
+          to="/admin"
+          onClick={onClose}
+          className="flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm hover:bg-[var(--color-surface)]"
+        >
+          <ShieldCheck size={16} /> Admin Console
+        </Link>
+      )}
       <Link
         to="/settings"
         onClick={onClose}

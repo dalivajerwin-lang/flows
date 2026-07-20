@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { format } from "date-fns";
 import type { Lead } from "@/stores/leads-store";
 import { StageBadge } from "@/components/ui/status-chip";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProjects } from "@/hooks/use-projects";
 
@@ -43,7 +44,10 @@ export function LeadListCards({ leads, onOpen }: { leads: Lead[]; onOpen: (id: s
                   </div>
                 </div>
               </div>
-              <StageBadge stage={l.stage as any} />
+              <div className="flex flex-col items-end gap-1">
+                {l.is_sample && <Badge variant="secondary">Training</Badge>}
+                <StageBadge stage={l.stage as any} />
+              </div>
             </div>
           </button>
         </li>

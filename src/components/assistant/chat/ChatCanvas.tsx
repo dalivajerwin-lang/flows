@@ -86,7 +86,8 @@ export function ChatCanvas() {
   const messagesMap = useAssistantStore((s) => s.messages);
   const messages = profile ? (messagesMap[profile.id] ?? []) : [];
   const pushMessage = useAssistantStore((s) => s.pushMessage);
-  const briefingShownSession = useAssistantStore((s) => s.briefingShownSession);
+  const upsertBriefing = useAssistantStore((s) => s.upsertBriefing);
+  const briefingShownAt = useAssistantStore((s) => s.briefingShownAt);
   const markBriefingShown = useAssistantStore((s) => s.markBriefingShown);
   const addTodo = useAssistantStore((s) => s.addTodo);
 
@@ -127,11 +128,15 @@ export function ChatCanvas() {
     return false;
   }, [db, profile, isManager]);
 
-  // Morning briefing (once per session) — wait until real data has loaded so
-  // the stats aren't computed against empty arrays mid-fetch.
+  // Daily briefing — at most once per calendar day per user (persisted), and
+  // refreshed on a new login (sign-out purges briefingShownAt). Delivered via
+  // upsertBriefing, which REPLACES the previous briefing bubble in place, so a
+  // re-fire can never stack duplicate greetings in the saved thread. All other
+  // AI output only ever happens in response to the user (send()).
   useEffect(() => {
     if (!profile || dbLoading) return;
-    if (briefingShownSession && Date.now() - briefingShownSession < 12 * 3_600_000) return;
+    const last = briefingShownAt[profile.id];
+    if (last && new Date(last).toDateString() === new Date().toDateString()) return;
 
     const priority = selectPriorityItems(db, { kind: "consultant", userId: profile.id });
     const trippings = db.appointments.filter(
@@ -171,14 +176,14 @@ export function ChatCanvas() {
       reversions,
       teamGoalPct: Math.min(teamGoalPct, 999),
     });
-    pushMessage(profile.id, {
+    upsertBriefing(profile.id, {
       id: uid(),
       role: "ai",
       text,
       createdAt: Date.now(),
       entityIds: { leads: [], agents: [] },
     });
-    markBriefingShown();
+    markBriefingShown(profile.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id, dbLoading]);
 
@@ -510,7 +515,10 @@ export function ChatCanvas() {
   };
 
   return (
-    <div className="relative flex h-full flex-col bg-[var(--color-background)]" onClick={onDelegatedClick}>
+    <div
+      className="relative flex h-full flex-col bg-[var(--color-background)]"
+      onClick={onDelegatedClick}
+    >
       <div className="border-b border-[var(--color-border-subtle)] bg-[var(--color-background)] px-4 py-2.5 flex items-center gap-3 shadow-xs z-10 shrink-0">
         <AssistantAvatar priorityAlert={priorityAlert} />
         <div>
@@ -535,12 +543,23 @@ export function ChatCanvas() {
         className="flex-1 overflow-y-auto px-4 py-4 bg-[var(--color-surface-subtle)] space-y-3.5"
         id="chat-thread"
       >
+        {/* Static welcome — rendered, never stored, so it can't duplicate. */}
+        <div className="flex w-full mb-1 justify-start">
+          <div className="max-w-[85%] rounded-2xl rounded-tl-xs border border-[var(--color-border-subtle)] bg-[var(--color-background)] px-4 py-3 text-sm leading-relaxed text-[var(--color-text-strong)] shadow-xs">
+            👋 Welcome back! Ask me anything about your team, sales, or CRM data.
+          </div>
+        </div>
         {messages.map((m, i) => (
           <ChatBubble
             key={m.id}
             message={m}
             entityRefs={entityRefs}
-            typewriter={m.role === "ai" && i === messages.length - 1}
+            // Animate only messages that were just created — persisted history
+            // must render statically on page load, or every visit looks like
+            // the assistant is "sending" its last message again.
+            typewriter={
+              m.role === "ai" && i === messages.length - 1 && Date.now() - m.createdAt < 5000
+            }
             widgetState={widgetStates[m.id]}
           />
         ))}

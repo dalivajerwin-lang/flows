@@ -130,6 +130,7 @@ export interface Database {
           undo_actor_id: string | null;
           archived_at: string | null;
           archive_reason: string | null;
+          is_sample: boolean;
           version: number;
           created_at: string;
           updated_at: string;
@@ -174,6 +175,7 @@ export interface Database {
           undo_actor_id?: string | null;
           archived_at?: string | null;
           archive_reason?: string | null;
+          is_sample?: boolean;
           version?: number;
           created_at?: string;
           updated_at?: string;
@@ -218,6 +220,7 @@ export interface Database {
           undo_actor_id?: string | null;
           archived_at?: string | null;
           archive_reason?: string | null;
+          is_sample?: boolean;
           version?: number;
           created_at?: string;
           updated_at?: string;
@@ -912,6 +915,10 @@ export interface Database {
       admin_restore_lead: {
         Args: { p_lead_id: string };
         Returns: void;
+      };
+      admin_purge_trash: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
       };
       admin_health_snapshot: {
         Args: Record<PropertyKey, never>;

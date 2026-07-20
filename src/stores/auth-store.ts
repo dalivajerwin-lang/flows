@@ -15,8 +15,9 @@ function clearUserData() {
   // In-memory CRM data (leads, notes, profiles, reports...).
   queryClient.clear();
   // Assistant chat history & personal todos are persisted per-user in
-  // localStorage — wipe both the live state and the persisted copy.
-  useAssistantStore.setState({ messages: {}, todos: {} });
+  // localStorage — wipe both the live state and the persisted copy. Resetting
+  // briefingShownAt means the next login gets a fresh daily briefing.
+  useAssistantStore.setState({ messages: {}, todos: {}, briefingShownAt: {} });
   if (typeof window !== "undefined") {
     try {
       window.localStorage.removeItem("tenacious:assistant");

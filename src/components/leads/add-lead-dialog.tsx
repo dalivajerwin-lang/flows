@@ -10,9 +10,12 @@ import type { LeadCreateFormValues } from "@/lib/lead-validation";
 export function AddLeadDialog({
   open,
   onOpenChange,
+  origin,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  /** Pass "onboarding" when the dialog is hosted inside the onboarding flow. */
+  origin?: "onboarding";
 }) {
   const profile = useCurrentProfile();
   const isManager = profile?.role !== "property_consultant";
@@ -28,6 +31,7 @@ export function AddLeadDialog({
       unit_types: values.unit_types,
       date_added: values.date_added,
       assigned_to: values.assigned_to,
+      origin,
     };
     try {
       const res = await createLead(payload);

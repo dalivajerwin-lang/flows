@@ -43,7 +43,11 @@ export function BroadcastHistoryDialog({
           )}
           <div className="space-y-6">
             {sorted.map((b) => {
-              const acked = consultants.map((c) => {
+              // Only consultants who existed when the broadcast went out are
+              // expected to acknowledge (migration 018 hides it from later
+              // hires) — don't count new accounts as unread forever.
+              const audience = consultants.filter((c) => c.created_at <= b.created_at);
+              const acked = audience.map((c) => {
                 const ack = acks.find((a) => a.broadcast_id === b.id && a.user_id === c.id);
                 return { c, ack };
               });
@@ -57,8 +61,8 @@ export function BroadcastHistoryDialog({
                       </div>
                       <p className="mt-1 whitespace-pre-wrap text-sm">{b.message}</p>
                     </div>
-                    <Badge variant={ackedCount === consultants.length ? "default" : "secondary"}>
-                      {ackedCount}/{consultants.length}
+                    <Badge variant={ackedCount === audience.length ? "default" : "secondary"}>
+                      {ackedCount}/{audience.length}
                     </Badge>
                   </div>
                   <div className="mt-3 overflow-hidden rounded-md border text-xs">
