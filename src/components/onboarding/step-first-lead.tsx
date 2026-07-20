@@ -65,6 +65,7 @@ export function StepFirstLead({ onLeadAdded }: { onLeadAdded: () => void }) {
         unit_types: [],
         date_added: new Date().toISOString(),
         assigned_to: profile.id,
+        origin: "onboarding",
       });
       if ("ok" in res && res.ok) {
         await queryClient.invalidateQueries({ queryKey: ["leads"] });
@@ -149,7 +150,7 @@ export function StepFirstLead({ onLeadAdded }: { onLeadAdded: () => void }) {
         </div>
       )}
 
-      <AddLeadDialog open={dialogOpen} onOpenChange={handleDialogChange} />
+      <AddLeadDialog open={dialogOpen} onOpenChange={handleDialogChange} origin="onboarding" />
     </div>
   );
 }

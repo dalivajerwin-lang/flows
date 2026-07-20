@@ -31,6 +31,8 @@ export interface ChatMessage {
   entityIds?: { leads: string[]; agents: string[] };
   /** temporary action data for replies like numbered lead suggestions */
   meta?: { leadSuggestionIds?: string[] };
+  /** marks the daily auto-briefing so a refresh replaces it in place */
+  isBriefing?: boolean;
 }
 
 export type ChatWidget =
@@ -42,17 +44,23 @@ export type ChatWidget =
 interface AssistantState {
   mode: AssistantMode;
   consoleExpanded: boolean; // desktop: whether the console pane is showing
-  briefingShownSession: number | null; // timestamp of last briefing
+  briefingShownAt: Record<string, number>; // per userId — persisted, ms timestamp of last briefing
   todos: Record<string, TodoItem[]>; // per userId
   links: LinkItem[];
   messages: Record<string, ChatMessage[]>; // per userId
   setMode: (m: AssistantMode) => void;
   toggleConsole: () => void;
-  markBriefingShown: () => void;
+  markBriefingShown: (userId: string) => void;
   addTodo: (userId: string, text: string) => void;
   toggleTodo: (userId: string, id: string) => void;
   removeTodo: (userId: string, id: string) => void;
   pushMessage: (userId: string, m: ChatMessage) => void;
+  /**
+   * Insert-or-replace the daily briefing. If a briefing message already
+   * exists in the thread it is updated in place (fresh text, same position)
+   * instead of appending a duplicate — refreshes must not stack greetings.
+   */
+  upsertBriefing: (userId: string, m: ChatMessage) => void;
   clearMessages: (userId: string) => void;
   addLink: (l: Omit<LinkItem, "id" | "created_at">) => void;
   updateLink: (id: string, patch: Partial<Omit<LinkItem, "id" | "created_at">>) => void;
@@ -68,13 +76,14 @@ export const useAssistantStore = create<AssistantState>()(
     (set) => ({
       mode: "conversational",
       consoleExpanded: true,
-      briefingShownSession: null,
+      briefingShownAt: {},
       todos: {},
       links: initialLinks,
       messages: {},
       setMode: (mode) => set({ mode }),
       toggleConsole: () => set((s) => ({ consoleExpanded: !s.consoleExpanded })),
-      markBriefingShown: () => set({ briefingShownSession: Date.now() }),
+      markBriefingShown: (userId) =>
+        set((s) => ({ briefingShownAt: { ...s.briefingShownAt, [userId]: Date.now() } })),
       addTodo: (userId, text) =>
         set((s) => {
           const list = s.todos[userId] ?? [];
@@ -108,6 +117,17 @@ export const useAssistantStore = create<AssistantState>()(
           const list = s.messages[userId] ?? [];
           return { messages: { ...s.messages, [userId]: [...list, m] } };
         }),
+      upsertBriefing: (userId, m) =>
+        set((s) => {
+          const list = s.messages[userId] ?? [];
+          const briefing = { ...m, isBriefing: true };
+          const idx = list.findIndex((x) => x.isBriefing);
+          const next =
+            idx === -1
+              ? [...list, briefing]
+              : list.map((x, i) => (i === idx ? { ...briefing, id: x.id } : x));
+          return { messages: { ...s.messages, [userId]: next } };
+        }),
       clearMessages: (userId) => set((s) => ({ messages: { ...s.messages, [userId]: [] } })),
       addLink: (l) =>
         set((s) => ({
@@ -122,6 +142,7 @@ export const useAssistantStore = create<AssistantState>()(
       partialize: (s) => ({
         mode: s.mode,
         consoleExpanded: s.consoleExpanded,
+        briefingShownAt: s.briefingShownAt,
         todos: s.todos,
         links: s.links,
         messages: s.messages,

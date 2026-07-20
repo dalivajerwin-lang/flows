@@ -1,17 +1,16 @@
-# in my current dashboard only performance have date filter. that date filter should effect in overall dashboard.
+instead of putting everything into a single CLAUDE.md, create a dedicated design system document.
 
-# toast notifications already showing yet im still in onboarding process like there are unassigned leads i need to check.
+/docs
 
-Issue: The AI assistant automatically sends a greeting every time the CRM page is opened or refreshed. This becomes repetitive and annoying for users.
-Requested changes:
-Do not auto-send a message on page load.
-Instead, display a static welcome message like:
-"👋 Welcome back! Ask me anything about your team, sales, or CRM data."
-Only generate AI responses after the user asks a question or taps a suggested prompt.
-Show the automatic summary only once per day or after the user logs in, not every time they visit the page.
-Save the conversation state so reopening the page doesn't create duplicate greeting messages.
-If an automatic update is necessary, replace the previous summary instead of adding a new chat message.
+I want to add this part in my claude.md
 
-All newly created accounts should not see the earlier broadcast before it waas broadcast. they will only see broadcast starting they start
+├── Project Overview
+├── Development Principles
+├── Architecture
+├── Coding Standards
+├── UI/UX Principles
+├── Branding Guidelines
+├── Accessibility
+└── Do Not Do
 
-Sample data created by a consultant in onboarding, it should not show in the main lead and for it should be deletable by the consultant
+Then, in CLAUDE.md, reference those documents and instruct Claude to follow them before generating code.

@@ -130,6 +130,7 @@ export interface Database {
           undo_actor_id: string | null;
           archived_at: string | null;
           archive_reason: string | null;
+          is_sample: boolean;
           version: number;
           created_at: string;
           updated_at: string;
@@ -174,6 +175,7 @@ export interface Database {
           undo_actor_id?: string | null;
           archived_at?: string | null;
           archive_reason?: string | null;
+          is_sample?: boolean;
           version?: number;
           created_at?: string;
           updated_at?: string;
@@ -218,6 +220,7 @@ export interface Database {
           undo_actor_id?: string | null;
           archived_at?: string | null;
           archive_reason?: string | null;
+          is_sample?: boolean;
           version?: number;
           created_at?: string;
           updated_at?: string;

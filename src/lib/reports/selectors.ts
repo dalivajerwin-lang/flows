@@ -32,6 +32,11 @@ import { LEAD_SOURCES, LEAD_SOURCE_LABELS } from "@/lib/lead-sources";
 import type { Period } from "./time-filter";
 import { inPeriod, monthPeriod, shiftMonthKey, currentMonthKey } from "./time-filter";
 
+/** Trashed and training/sample leads never count toward reports. */
+function isReportableLead(l: Lead): boolean {
+  return !l.deleted_at && !l.is_sample;
+}
+
 // ---------- Leaderboard ----------
 
 export interface LeaderboardRow {
@@ -43,7 +48,7 @@ export interface LeaderboardRow {
 }
 
 function verifiedInPeriod(l: Lead, period: Period): boolean {
-  if (!l.deleted_at && l.stage === "closed_sale" && l.closed_sale_status === "verified") {
+  if (isReportableLead(l) && l.stage === "closed_sale" && l.closed_sale_status === "verified") {
     // Prefer the verified timestamp; fall back to updated_at if verified_at is missing
     const ts = l.closed_sale_verified_at ?? l.updated_at;
     return inPeriod(ts, period);
@@ -96,7 +101,7 @@ export function selectCrfLeaderboard(db: DBShape, period: Period): CrfLeaderboar
     const crfs = db.leads.filter(
       (l) =>
         l.assigned_to === c.id &&
-        !l.deleted_at &&
+        isReportableLead(l) &&
         l.crf_first_entered_at != null &&
         inPeriod(l.crf_first_entered_at, period),
     );
@@ -166,7 +171,9 @@ export function selectRevenueSummary(db: DBShape, period: Period) {
   // Spec: buffer row shown separately, never summed. We show all currently-pending.
   const pendingLeads = db.leads.filter(
     (l) =>
-      !l.deleted_at && l.stage === "closed_sale" && l.closed_sale_status === "pending_verification",
+      isReportableLead(l) &&
+      l.stage === "closed_sale" &&
+      l.closed_sale_status === "pending_verification",
   );
   const pendingValue = pendingLeads.reduce((s, l) => s + (l.sale_price ?? 0), 0);
   return {
@@ -228,7 +235,8 @@ export function selectMonthlyTrend(db: DBShape, monthsBack: number): MonthBucket
       }
     }
     for (const l of db.leads) {
-      if (inPeriod(l.crf_submission_date, period)) bucket.crfSubmissions += 1;
+      if (isReportableLead(l) && inPeriod(l.crf_submission_date, period))
+        bucket.crfSubmissions += 1;
     }
     buckets.push(bucket);
   }
@@ -253,7 +261,7 @@ export function selectSourceRoi(
   consultantFilter?: string,
 ): SourceRoiRow[] {
   const inScope = (l: Lead) =>
-    !l.deleted_at && (!consultantFilter || l.assigned_to === consultantFilter);
+    isReportableLead(l) && (!consultantFilter || l.assigned_to === consultantFilter);
   // First-time CRF entries from audit trail
   const firstCrfByLead = new Map<string, AuditEntry>();
   for (const a of db.audit_trail) {
@@ -312,7 +320,7 @@ export interface ActivityRow {
 export function selectActivityVolume(db: DBShape, period: Period): ActivityRow[] {
   const consultants = db.profiles.filter((p) => p.role === "property_consultant");
   return consultants.map((c) => {
-    const owned = db.leads.filter((l) => l.assigned_to === c.id && !l.deleted_at).length;
+    const owned = db.leads.filter((l) => l.assigned_to === c.id && isReportableLead(l)).length;
     // Attribute by original performer: appointments carry created_by; leadActivities carry actor_id.
     // Spec: activities credited to the performer. Appointments performer = consultant_id.
     const myApts = db.appointments.filter(

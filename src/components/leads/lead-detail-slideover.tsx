@@ -15,6 +15,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { SlideOver } from "@/components/ui/responsive-dialog";
 import { StageBadge } from "@/components/ui/status-chip";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -272,6 +273,7 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-xl font-semibold">{lead.full_name}</h3>
+            {lead.is_sample && <Badge variant="secondary">Training</Badge>}
             <StageBadge stage={lead.stage as Stage} />
           </div>
           {lead.contact_number && (
@@ -634,8 +636,8 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
               <li key={a.id}>
                 <span className="text-[var(--color-text)]">{a.summary}</span>
                 {" — "}
-                {(a.actor_id ? profilesById[a.actor_id]?.display_name : undefined) ?? "System"} ·{" "}
-                {format(new Date(a.created_at), "MMM d, HH:mm")}
+                {(a.actor_id ? profilesById[a.actor_id]?.display_name : undefined) ??
+                  "System"} · {format(new Date(a.created_at), "MMM d, HH:mm")}
               </li>
             ))}
             {audit.length === 0 && <li>No activity yet.</li>}
@@ -656,11 +658,12 @@ function LeadDetailBody({ leadId, onClose }: { leadId: string; onClose: () => vo
             <Zap size={16} /> {isManager ? "Reactivate (Manager Override)" : "Reactivate"}
           </Button>
         )}
-        {isManager && !lead.deleted_at && (
-          <Button variant="destructive" onClick={() => setTrashOpen(true)}>
-            <Trash2 size={16} /> Move to Trash
-          </Button>
-        )}
+        {(isManager || (lead.is_sample && lead.assigned_to === profile?.id)) &&
+          !lead.deleted_at && (
+            <Button variant="destructive" onClick={() => setTrashOpen(true)}>
+              <Trash2 size={16} /> Move to Trash
+            </Button>
+          )}
       </section>
 
       {lead.closed_sale_rejection_reason && (

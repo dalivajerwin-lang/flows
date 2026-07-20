@@ -349,7 +349,7 @@ export default function Dashboard() {
 
       {isManager && (
         <Rise order={9}>
-          <TeamOverviewTable />
+          <TeamOverviewTable period={period} />
         </Rise>
       )}
 
@@ -699,7 +699,7 @@ function HeroSummary({
 }) {
   const { db } = useDashboardData();
   const navigate = useNavigate();
-  const counts = selectStageCounts(db, scope);
+  const counts = selectStageCounts(db, scope, period);
   const activeLeads = counts.new_lead + counts.crf + counts.reserved + counts.documentation;
   const followUps = selectPriorityItems(db, scope, { includeUnassigned: isManager }).length;
   const pendingVerifications = isManager ? selectPendingSales(db).length : 0;
@@ -795,7 +795,7 @@ function PerformanceMetrics({ scope, period }: { scope: Scope; period: Period })
   const prev = prevPeriod(period);
   const prevVerified = prev ? selectVerifiedSalesValue(db, scope, prev) : 0;
   const pending = selectPendingSalesValue(db, scope);
-  const counts = selectStageCounts(db, scope);
+  const counts = selectStageCounts(db, scope, period);
   const sources = selectSourceBreakdown(db, scope, period);
   const newInPeriod = sources.reduce((sum, s) => sum + s.count, 0);
 
@@ -1462,7 +1462,7 @@ function QuickInsights({
   const { db } = useDashboardData();
   const upsertTeamGoal = useUpsertTeamGoal();
   const sources = selectSourceBreakdown(db, scope, period);
-  const verified = selectVerifiedSalesValue(db, scope);
+  const verified = selectVerifiedSalesValue(db, scope, period);
   const pending = selectPendingSalesValue(db, scope);
   const goal = isManager ? selectTeamGoal(db) : selectPersonalTarget(db, userId).amount;
   const isAuto = !isManager && selectPersonalTarget(db, userId).auto;
@@ -1473,8 +1473,10 @@ function QuickInsights({
   const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  // Goals are monthly — pace comparison only makes sense on the current month.
+  const isCurrentMonth = period.kind === "month" && period.monthKey === currentMonthKey();
   const paceRatio = dayOfMonth / daysInMonth;
-  const attained = goal ? verified / goal : 0;
+  const attained = goal && isCurrentMonth ? verified / goal : 0;
   const pacing = attained >= paceRatio ? "on track" : "behind pace";
 
   const [animPct, setAnimPct] = useState(0);
@@ -1523,7 +1525,7 @@ function QuickInsights({
             <InlineEditableAmount value={goal ?? 0} onSave={(v) => setTeamGoal(monthKey, v)} />
           )}
         </div>
-        {goal ? (
+        {goal && isCurrentMonth ? (
           <>
             <TooltipProvider delayDuration={200}>
               <div className="flex items-baseline justify-between text-sm">
@@ -1551,6 +1553,22 @@ function QuickInsights({
               <span>Pending: {compactPeso(pending)}</span>
             </div>
           </>
+        ) : goal ? (
+          // Goals are monthly — for past periods show the period's verified
+          // value without pace math against the current month's goal.
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-baseline justify-between text-sm">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="font-semibold cursor-help">{compactPeso(verified)}</span>
+                </TooltipTrigger>
+                <TooltipContent>{exactPeso(verified)}</TooltipContent>
+              </Tooltip>
+              <span className="text-xs text-(--color-text-secondary)">
+                verified — {period.kind === "all" ? "all time" : period.label.toLowerCase()}
+              </span>
+            </div>
+          </TooltipProvider>
         ) : (
           <div className="flex items-center gap-2">
             <span className="text-sm text-(--color-text-secondary)">No Goal Set</span>
@@ -1664,9 +1682,9 @@ function PersonalTargetEditor() {
 
 // ==== Team Overview Table ====
 
-function TeamOverviewTable() {
+function TeamOverviewTable({ period }: { period: Period }) {
   const { db } = useDashboardData();
-  const rows = selectTeamOverview(db);
+  const rows = selectTeamOverview(db, period);
   const navigate = useNavigate();
   const isMobile = !useMediaQuery("(min-width: 1024px)");
   const go = (id: string) => navigate({ to: "/leads", search: { assigned: id } });

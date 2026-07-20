@@ -31,6 +31,13 @@ export interface LeadCreateInput {
   unit_types: UnitType[];
   date_added: string; // ISO
   assigned_to: string; // user id or "" for unassigned
+  /**
+   * Where the creation came from. Leads created inside the onboarding flow
+   * skip the "new unassigned lead" manager fanout — a trainee poking at the
+   * wizard shouldn't page the whole management team. Direct assignments
+   * still notify the assignee (that's a real handoff either way).
+   */
+  origin?: "onboarding";
 }
 
 export type DuplicateResult =
@@ -297,6 +304,7 @@ export async function createLead(input: LeadCreateInput): Promise<DuplicateResul
     sale_price: null,
     deleted_at: null,
     reactivated_at: null,
+    is_sample: input.origin === "onboarding",
     version: 1,
   };
 
@@ -318,7 +326,7 @@ export async function createLead(input: LeadCreateInput): Promise<DuplicateResul
       deep_link_path: `/leads?lead=${leadId}`,
       lead_id: leadId,
     });
-  } else if (!assignedTo) {
+  } else if (!assignedTo && input.origin !== "onboarding") {
     // Unassigned lead — alert all managers to assign it.
     const { data: managers = [] } = await db
       .from("profiles")
@@ -582,7 +590,17 @@ export async function trashLead(id: string): Promise<{ ok: boolean; error?: stri
   const auth = useAuth.getState();
   if (!auth.userId || !auth.profile) return { ok: false, error: "Not authenticated" };
   const me = auth.profile;
-  if (me.role === "property_consultant") return { ok: false, error: "Manager only" };
+  if (me.role === "property_consultant") {
+    // Consultants may only trash their own training/sample leads.
+    const { data: lead } = await db
+      .from("leads")
+      .select("assigned_to, is_sample")
+      .eq("id", id)
+      .maybeSingle();
+    if (!lead || lead.assigned_to !== me.id || !lead.is_sample) {
+      return { ok: false, error: "Only managers can delete real leads" };
+    }
+  }
 
   const { error } = await db
     .from("leads")

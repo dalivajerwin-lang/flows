@@ -167,13 +167,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // /onboarding is protected but renders without the app chrome (§2.1) —
   // the auth gate above has already run, so bare children are safe here.
+  // No NotificationToaster here: team activity (e.g. "New unassigned lead")
+  // must not toast over the onboarding flow. On finish, the toaster mounts
+  // in the main shell and primes on existing rows, so nothing retro-toasts;
+  // the unread badge still surfaces anything that arrived meanwhile.
   if (STANDALONE_AUTHED_PATHS.has(path)) {
-    return (
-      <>
-        {children}
-        <NotificationToaster />
-      </>
-    );
+    return <>{children}</>;
   }
 
   const unreadCount = notifications.filter((n) => n.user_id === profile.id && !n.is_read).length;

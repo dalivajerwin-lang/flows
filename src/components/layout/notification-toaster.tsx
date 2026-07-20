@@ -19,14 +19,18 @@ import { layersFor } from "@/lib/notify";
 export function NotificationToaster() {
   const navigate = useNavigate();
   const userId = useAuth((s) => s.userId);
-  const { data: notifications = [] } = useNotifications(userId);
+  const { data: notifications = [], isSuccess } = useNotifications(userId);
   const seenRef = useRef<Set<string>>(new Set());
   const primedRef = useRef(false);
 
   useEffect(() => {
     if (!userId) return;
+    // Prime only after the query has actually resolved — priming on the
+    // pre-fetch empty array would make every existing notification look
+    // "new" one render later and burst stale toasts on app load.
+    if (!isSuccess) return;
     if (!primedRef.current) {
-      // Skip existing notifications on first mount — we only toast new ones.
+      // Skip existing notifications on first load — we only toast new ones.
       notifications.forEach((n) => seenRef.current.add(n.id));
       primedRef.current = true;
       return;
@@ -49,7 +53,7 @@ export function NotificationToaster() {
           : undefined,
       });
     }
-  }, [notifications, userId, navigate]);
+  }, [notifications, isSuccess, userId, navigate]);
 
   return null;
 }

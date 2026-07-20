@@ -33,8 +33,17 @@ import { type Period, inPeriod } from "@/lib/reports/time-filter";
 
 export type Scope = { kind: "consultant"; userId: string } | { kind: "team" };
 
+/**
+ * A lead counts toward metrics only if it isn't trashed and isn't a
+ * training/sample lead (onboarding practice leads stay visible in the
+ * pipeline but never appear in dashboards, reports, or alerts).
+ */
+export function isReportableLead(l: Lead): boolean {
+  return !l.deleted_at && !l.is_sample;
+}
+
 function inScope(l: Lead, scope: Scope): boolean {
-  if (l.deleted_at) return false;
+  if (!isReportableLead(l)) return false;
   if (scope.kind === "consultant") return l.assigned_to === scope.userId;
   return true;
 }
@@ -127,7 +136,7 @@ export function selectPriorityItems(
   const items: PriorityItem[] = [];
 
   for (const lead of db.leads) {
-    if (lead.deleted_at) continue;
+    if (!isReportableLead(lead)) continue;
 
     // Unassigned (Manager only, rank 4-top)
     if (opts.includeUnassigned && !lead.assigned_to) {
@@ -242,7 +251,7 @@ export function selectPendingSales(db: DBShape): PendingSale[] {
   return db.leads
     .filter(
       (l) =>
-        !l.deleted_at &&
+        isReportableLead(l) &&
         l.stage === "closed_sale" &&
         l.closed_sale_status === "pending_verification",
     )
@@ -255,7 +264,7 @@ export function selectPendingSales(db: DBShape): PendingSale[] {
 export function selectEscalatedExpirations(db: DBShape): Lead[] {
   const nowMs = pipelineNow();
   return db.leads.filter((l) => {
-    if (l.deleted_at || l.stage !== "reserved" || !l.reservation_expires_at) return false;
+    if (!isReportableLead(l) || l.stage !== "reserved" || !l.reservation_expires_at) return false;
     const ms = new Date(l.reservation_expires_at).getTime() - nowMs;
     // Escalate when < 4h remain, and keep escalated once expired but unresolved.
     return ms < 4 * 3600_000 || l.reservation_status === "expired";
@@ -428,11 +437,11 @@ function weekBoundsManila(): { start: number; end: number } {
   return { start, end: start + 7 * 86400_000 };
 }
 
-export function selectTeamOverview(db: DBShape): TeamRow[] {
+export function selectTeamOverview(db: DBShape, period?: Period): TeamRow[] {
   const { start, end } = weekBoundsManila();
   const consultants = db.profiles.filter((p) => p.role === "property_consultant");
   return consultants.map((c) => {
-    const myLeads = db.leads.filter((l) => l.assigned_to === c.id && !l.deleted_at);
+    const myLeads = db.leads.filter((l) => l.assigned_to === c.id && isReportableLead(l));
     const activeStages: Stage[] = ["new_lead", "crf", "reserved", "documentation"];
     const activeLeads = myLeads.filter((l) => activeStages.includes(l.stage as Stage)).length;
     const apts = db.appointments.filter((a) => {
@@ -445,20 +454,23 @@ export function selectTeamOverview(db: DBShape): TeamRow[] {
         a.appointment_type === "online_presentation" ||
         a.appointment_type === "actual_presentation",
     ).length;
-    const closedThisMonth = myLeads.filter(
+    // Closed sales follow the dashboard's period filter; default = current month.
+    const closedInPeriod = myLeads.filter(
       (l) =>
         l.stage === "closed_sale" &&
         l.closed_sale_status === "verified" &&
         l.closed_sale_verified_at &&
-        dateKeyManila(l.closed_sale_verified_at).slice(0, 7) === currentMonthKey(),
+        (period
+          ? inPeriod(l.closed_sale_verified_at, period)
+          : dateKeyManila(l.closed_sale_verified_at).slice(0, 7) === currentMonthKey()),
     );
     return {
       consultant: c,
       activeLeads,
       trippingsThisWeek: trippings,
       presentationsThisWeek: presentations,
-      closedCount: closedThisMonth.length,
-      closedValue: closedThisMonth.reduce((sum, l) => sum + (l.sale_price ?? 0), 0),
+      closedCount: closedInPeriod.length,
+      closedValue: closedInPeriod.reduce((sum, l) => sum + (l.sale_price ?? 0), 0),
       lastLogin: c.last_login_at,
     };
   });
