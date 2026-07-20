@@ -1,5 +1,3 @@
-# make the default goal for onboarding choices 50M 100m 500m for the manager
-
 # in my current dashboard only performance have date filter. that date filter should effect in overall dashboard.
 
 # toast notifications already showing yet im still in onboarding process like there are unassigned leads i need to check.
@@ -13,3 +11,7 @@ Only generate AI responses after the user asks a question or taps a suggested pr
 Show the automatic summary only once per day or after the user logs in, not every time they visit the page.
 Save the conversation state so reopening the page doesn't create duplicate greeting messages.
 If an automatic update is necessary, replace the previous summary instead of adding a new chat message.
+
+All newly created accounts should not see the earlier broadcast before it waas broadcast. they will only see broadcast starting they start
+
+Sample data created by a consultant in onboarding, it should not show in the main lead and for it should be deletable by the consultant

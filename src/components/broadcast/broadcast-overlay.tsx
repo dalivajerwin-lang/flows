@@ -27,7 +27,15 @@ export function BroadcastOverlay() {
     // Consultants must acknowledge; managers do not block on their own sends.
     if (!me || me.role !== "property_consultant") return null;
     const sorted = [...broadcasts].sort((a, b) => a.created_at.localeCompare(b.created_at));
-    return sorted.find((b) => !myAcks.includes(b.id)) ?? null;
+    return (
+      sorted.find(
+        (b) =>
+          !myAcks.includes(b.id) &&
+          // Only broadcasts sent after this account existed — new hires never
+          // ack the backlog (RLS in migration 018 enforces the same rule).
+          b.created_at >= me.created_at,
+      ) ?? null
+    );
   }, [broadcasts, myAcks, userId, profiles]);
 
   if (!pending) return null;

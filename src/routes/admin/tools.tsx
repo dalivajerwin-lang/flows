@@ -5,14 +5,11 @@ import { useAuth } from "@/stores/auth-store";
 import { useAllProfiles } from "@/hooks/use-profiles";
 import {
   useAdminForceStage,
+  useAdminPurgeTrash,
   useAdminReassignLeads,
   useAdminRestoreLead,
 } from "@/hooks/use-admin";
-import {
-  useDeletedLeads,
-  useLeadsAssignedTo,
-  usePendingApprovals,
-} from "@/hooks/use-admin-tools";
+import { useDeletedLeads, useLeadsAssignedTo, usePendingApprovals } from "@/hooks/use-admin-tools";
 import { approveReversion, denyReversion } from "@/stores/pipeline-store";
 import { STAGES, STAGE_LABELS, type Stage } from "@/lib/constants";
 import { Button } from "@/components/ui/tenacious-button";
@@ -27,7 +24,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArchiveRestore, ArrowRightLeft, Inbox, Wrench } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ArchiveRestore, ArrowRightLeft, Inbox, Trash2, Wrench } from "lucide-react";
 
 export const Route = createFileRoute("/admin/tools")({
   head: () => ({ meta: [{ title: "Intervention Tools — Tenacious CRM" }] }),
@@ -113,7 +117,11 @@ function ReassignPanel() {
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="From">
-          <select value={fromUser} onChange={(e) => setFromUser(e.target.value)} className={selectClass}>
+          <select
+            value={fromUser}
+            onChange={(e) => setFromUser(e.target.value)}
+            className={selectClass}
+          >
             <option value="">Select user...</option>
             {profiles
               .filter((p) => p.role !== "superadmin")
@@ -125,7 +133,11 @@ function ReassignPanel() {
           </select>
         </Field>
         <Field label="To">
-          <select value={toUser} onChange={(e) => setToUser(e.target.value)} className={selectClass}>
+          <select
+            value={toUser}
+            onChange={(e) => setToUser(e.target.value)}
+            className={selectClass}
+          >
             <option value="">Select active user...</option>
             {activeTargets
               .filter((p) => p.id !== fromUser)
@@ -143,7 +155,13 @@ function ReassignPanel() {
         </p>
       )}
       <Button
-        disabled={!fromUser || !toUser || fromUser === toUser || reassign.isPending || fromLeads.length === 0}
+        disabled={
+          !fromUser ||
+          !toUser ||
+          fromUser === toUser ||
+          reassign.isPending ||
+          fromLeads.length === 0
+        }
         onClick={handleReassign}
       >
         {reassign.isPending ? "Reassigning..." : `Reassign ${fromLeads.length || ""} lead(s)`}
@@ -182,13 +200,20 @@ function ForceStagePanel() {
     <div className="max-w-2xl space-y-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
       <div className="font-semibold text-[var(--color-text)]">Force a stage transition</div>
       <p className="text-sm text-[var(--color-text-secondary)]">
-        Bypasses the normal reversion workflow and its validations. Use only when the pipeline
-        state machine itself is what's stuck. A reason is required and lands in the audit log as{" "}
+        Bypasses the normal reversion workflow and its validations. Use only when the pipeline state
+        machine itself is what's stuck. A reason is required and lands in the audit log as{" "}
         <span className="font-mono text-xs">critical</span>.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Lead owner">
-          <select value={ownerId} onChange={(e) => { setOwnerId(e.target.value); setLeadId(""); }} className={selectClass}>
+          <select
+            value={ownerId}
+            onChange={(e) => {
+              setOwnerId(e.target.value);
+              setLeadId("");
+            }}
+            className={selectClass}
+          >
             <option value="">Select user...</option>
             {profiles
               .filter((p) => p.role !== "superadmin")
@@ -200,7 +225,12 @@ function ForceStagePanel() {
           </select>
         </Field>
         <Field label="Lead">
-          <select value={leadId} onChange={(e) => setLeadId(e.target.value)} className={selectClass} disabled={!ownerId}>
+          <select
+            value={leadId}
+            onChange={(e) => setLeadId(e.target.value)}
+            className={selectClass}
+            disabled={!ownerId}
+          >
             <option value="">Select lead...</option>
             {leads.map((l) => (
               <option key={l.id} value={l.id}>
@@ -210,7 +240,11 @@ function ForceStagePanel() {
           </select>
         </Field>
         <Field label="New stage">
-          <select value={toStage} onChange={(e) => setToStage(e.target.value as Stage)} className={selectClass}>
+          <select
+            value={toStage}
+            onChange={(e) => setToStage(e.target.value as Stage)}
+            className={selectClass}
+          >
             <option value="">Select stage...</option>
             {STAGES.filter((s) => s !== selectedLead?.stage).map((s) => (
               <option key={s} value={s}>
@@ -243,63 +277,132 @@ function ForceStagePanel() {
 function DeletedLeadsPanel() {
   const { data: deleted = [], isLoading } = useDeletedLeads();
   const restore = useAdminRestoreLead();
+  const purge = useAdminPurgeTrash();
+  const [purgeOpen, setPurgeOpen] = useState(false);
+  const [purgeConfirm, setPurgeConfirm] = useState("");
+
+  const closePurge = () => {
+    setPurgeOpen(false);
+    setPurgeConfirm("");
+  };
+
+  const handlePurge = async () => {
+    try {
+      const count = await purge.mutateAsync();
+      toast.success(`Trash emptied — ${count} lead(s) permanently deleted.`);
+      closePurge();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to empty trash.");
+    }
+  };
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Lead</TableHead>
-            <TableHead>Stage</TableHead>
-            <TableHead>Deleted</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
+    <div className="space-y-4">
+      {deleted.length > 0 && (
+        <div className="flex justify-end">
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={purge.isPending}
+            onClick={() => setPurgeOpen(true)}
+          >
+            <Trash2 className="mr-1 h-4 w-4" /> Empty trash ({deleted.length})
+          </Button>
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center text-sm text-[var(--color-text-secondary)]">
-                Loading...
-              </TableCell>
+              <TableHead>Lead</TableHead>
+              <TableHead>Stage</TableHead>
+              <TableHead>Deleted</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ) : deleted.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center text-sm text-[var(--color-text-secondary)]">
-                Trash is empty.
-              </TableCell>
-            </TableRow>
-          ) : (
-            deleted.map((l) => (
-              <TableRow key={l.id}>
-                <TableCell className="font-semibold">{l.full_name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{STAGE_LABELS[l.stage as Stage] ?? l.stage}</Badge>
-                </TableCell>
-                <TableCell className="text-sm text-[var(--color-text-secondary)]">
-                  {l.deleted_at ? new Date(l.deleted_at).toLocaleString() : "—"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={restore.isPending}
-                    onClick={async () => {
-                      try {
-                        await restore.mutateAsync(l.id);
-                        toast.success(`${l.full_name} restored.`);
-                      } catch (err) {
-                        toast.error(err instanceof Error ? err.message : "Restore failed.");
-                      }
-                    }}
-                  >
-                    <ArchiveRestore className="mr-1 h-4 w-4" /> Restore
-                  </Button>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="h-24 text-center text-sm text-[var(--color-text-secondary)]"
+                >
+                  Loading...
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : deleted.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="h-24 text-center text-sm text-[var(--color-text-secondary)]"
+                >
+                  Trash is empty.
+                </TableCell>
+              </TableRow>
+            ) : (
+              deleted.map((l) => (
+                <TableRow key={l.id}>
+                  <TableCell className="font-semibold">{l.full_name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{STAGE_LABELS[l.stage as Stage] ?? l.stage}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-[var(--color-text-secondary)]">
+                    {l.deleted_at ? new Date(l.deleted_at).toLocaleString() : "—"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={restore.isPending}
+                      onClick={async () => {
+                        try {
+                          await restore.mutateAsync(l.id);
+                          toast.success(`${l.full_name} restored.`);
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Restore failed.");
+                        }
+                      }}
+                    >
+                      <ArchiveRestore className="mr-1 h-4 w-4" /> Restore
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={purgeOpen} onOpenChange={(open) => !open && closePurge()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Permanently delete {deleted.length} trashed lead(s)?</DialogTitle>
+            <DialogDescription>
+              This erases every lead in the trash along with its notes and stage history. There is
+              no restore after this. Type <span className="font-mono font-bold">DELETE</span> to
+              confirm.
+            </DialogDescription>
+          </DialogHeader>
+          <TenaciousInput
+            placeholder="Type DELETE"
+            value={purgeConfirm}
+            onChange={(e) => setPurgeConfirm(e.target.value)}
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={closePurge}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={purgeConfirm !== "DELETE" || purge.isPending}
+              onClick={handlePurge}
+            >
+              {purge.isPending ? "Deleting..." : "Delete all forever"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -397,7 +500,10 @@ function ApprovalsPanel() {
         ) : (
           <div className="space-y-2">
             {extensions.map((e) => (
-              <div key={e.id} className="rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3 text-sm">
+              <div
+                key={e.id}
+                className="rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3 text-sm"
+              >
                 <span className="font-semibold">{e.lead?.full_name ?? "Unknown lead"}</span>{" "}
                 <span className="text-[var(--color-text-secondary)]">
                   — requested by {e.actor?.display_name ?? "unknown"} on{" "}

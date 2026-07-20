@@ -913,6 +913,10 @@ export interface Database {
         Args: { p_lead_id: string };
         Returns: void;
       };
+      admin_purge_trash: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       admin_health_snapshot: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
