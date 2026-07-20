@@ -6,12 +6,14 @@ import { PanelCard } from "../PanelCard";
 import { useAppointments } from "@/hooks/use-appointments";
 import { db as supabase } from "@/lib/supabase";
 import { useCurrentProfile } from "@/stores/auth-store";
-import { useAssistantStore } from "@/stores/assistant-store";
+import {
+  useMyAgenda,
+  addAgendaItem,
+  toggleAgendaItem,
+  removeAgendaItem,
+} from "@/hooks/use-daily-agenda";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/tenacious-button";
-import type { TodoItem } from "@/stores/assistant-store";
-
-const EMPTY_TODOS: TodoItem[] = [];
 
 export function DailyAgendaPanel() {
   const profile = useCurrentProfile();
@@ -35,14 +37,9 @@ export function DailyAgendaPanel() {
       return (data ?? []) as { lead_id: string | null; actor_id: string; created_at: string }[];
     },
   });
-  // Selector must return a stable reference (zustand v5 / useSyncExternalStore):
-  // default to [] outside the selector, never inside it.
-  const todosRaw = useAssistantStore((s) => (profile ? s.todos[profile.id] : undefined));
-  const todos = todosRaw ?? EMPTY_TODOS;
-  const addTodo = useAssistantStore((s) => s.addTodo);
-  const toggleTodo = useAssistantStore((s) => s.toggleTodo);
-  const removeTodo = useAssistantStore((s) => s.removeTodo);
+  const { data: todos = [] } = useMyAgenda();
   const [draft, setDraft] = useState("");
+  const doneCount = todos.filter((t) => t.done).length;
 
   const today = useMemo(() => {
     if (!profile) return [];
@@ -63,6 +60,8 @@ export function DailyAgendaPanel() {
 
   return (
     <PanelCard
+      id="panel-agenda"
+      defaultExpanded
       icon={<Calendar size={16} className="text-[var(--color-primary)]" />}
       title="Daily Agenda Planner"
     >
@@ -122,22 +121,36 @@ export function DailyAgendaPanel() {
       )}
 
       <div className="border-t border-[var(--color-border-subtle)] pt-3">
-        <div className="mb-2 text-xs font-semibold uppercase text-[var(--color-text-secondary)]">
-          Personal Todos
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase text-[var(--color-text-secondary)]">
+            Today's Agenda
+          </span>
+          {todos.length > 0 && (
+            <span
+              className={cn(
+                "text-xs font-medium",
+                doneCount === todos.length
+                  ? "text-[var(--color-success-soft-fg)]"
+                  : "text-[var(--color-text-secondary)]",
+              )}
+            >
+              Done {doneCount}/{todos.length}
+            </span>
+          )}
         </div>
         <form
           className="mb-2 flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             if (draft.trim()) {
-              addTodo(profile.id, draft.trim());
+              addAgendaItem(profile.id, draft.trim());
               setDraft("");
             }
           }}
         >
           <input
             className="flex-1 rounded-md border border-[var(--color-border-muted)] px-3 py-2 text-sm"
-            placeholder="Add a todo…"
+            placeholder="Add an agenda item…"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
@@ -152,7 +165,7 @@ export function DailyAgendaPanel() {
               className="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-[var(--color-surface-subtle)]"
             >
               <button
-                onClick={() => toggleTodo(profile.id, t.id)}
+                onClick={() => toggleAgendaItem(t)}
                 aria-label={t.done ? `Mark "${t.text}" as not done` : `Mark "${t.text}" as done`}
                 aria-pressed={t.done}
                 className={cn(
@@ -170,7 +183,8 @@ export function DailyAgendaPanel() {
                 {t.text}
               </span>
               <button
-                onClick={() => removeTodo(profile.id, t.id)}
+                onClick={() => removeAgendaItem(t.id)}
+                aria-label={`Remove "${t.text}"`}
                 className="text-[var(--color-text-subtle)] hover:text-[var(--color-danger-solid)]"
               >
                 <Trash2 size={14} />
@@ -178,7 +192,9 @@ export function DailyAgendaPanel() {
             </li>
           ))}
           {todos.length === 0 && (
-            <li className="text-xs text-[var(--color-text-subtle)]">No todos yet.</li>
+            <li className="text-xs text-[var(--color-text-subtle)]">
+              Nothing planned yet — add your first item to start today's agenda.
+            </li>
           )}
         </ul>
       </div>

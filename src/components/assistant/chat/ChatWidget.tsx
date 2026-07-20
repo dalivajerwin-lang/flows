@@ -10,6 +10,7 @@ import { GoalPaceCalculatorPanel } from "../console/panels/GoalPaceCalculatorPan
 import { LinksLibraryAdminPanel } from "../console/panels/LinksLibraryAdminPanel";
 import { ProjectAdminPanel } from "../console/panels/ProjectAdminPanel";
 import { ReversionInboxPanel } from "../console/panels/ReversionInboxPanel";
+import { TeamAgendaPanel } from "../console/panels/TeamAgendaPanel";
 import { STAGE_LABELS, type Stage } from "@/lib/constants";
 import { useCurrentProfile } from "@/stores/auth-store";
 import { isManagerish } from "@/hooks/use-role";
@@ -36,6 +37,7 @@ const PANEL_MAP: Record<string, React.ComponentType> = {
   links_admin: LinksLibraryAdminPanel,
   projects_admin: ProjectAdminPanel,
   reversion_inbox: ReversionInboxPanel,
+  team_agenda: TeamAgendaPanel,
   fallback_routing: FallbackRoutingPanel,
 };
 

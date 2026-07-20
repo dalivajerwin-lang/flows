@@ -1,16 +1,14 @@
-instead of putting everything into a single CLAUDE.md, create a dedicated design system document.
+1. As a consultant in first day remove the set up follow up reminder, explore the assistant in one prompt
+   Change it to
 
-/docs
+Add A Crf Link if they didn't add it in onboarding
+View your Schedule
+Add a Daily Agenda
 
-I want to add this part in my claude.md
+3. Since uploading the avatar of Manager or Consultant is optional, they can Choose a generic avatar, I want you to create 10 generic avatar for them. Put it in public/avatar
 
-├── Project Overview
-├── Development Principles
-├── Architecture
-├── Coding Standards
-├── UI/UX Principles
-├── Branding Guidelines
-├── Accessibility
-└── Do Not Do
+---
 
-Then, in CLAUDE.md, reference those documents and instruct Claude to follow them before generating code.
+4. for onboarding of Consultants they should have an option skip adding of leads.
+
+5. I dont know until when the onboarding will show because it always show everytime I login.

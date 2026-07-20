@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -23,13 +23,17 @@ const MAX_FILE = 10 * 1024 * 1024; // 10 MB
 /**
  * Manager-only broadcast composer. On submit, uploads attachments to Supabase Storage,
  * creates the broadcast row and dispatches a `broadcast` notification to every consultant.
+ * `prefill` seeds the message when the dialog opens (e.g. agenda reminders) —
+ * the manager can still edit before sending.
  */
 export function BroadcastComposer({
   open,
   onOpenChange,
+  prefill,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  prefill?: string;
 }) {
   const userId = useAuth((s) => s.userId);
   const { data: profiles = [] } = useProfiles();
@@ -42,6 +46,12 @@ export function BroadcastComposer({
   const [submitting, setSubmitting] = useState(false);
   const imgInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Seed the message on open; never overwrite while the manager is typing.
+  useEffect(() => {
+    if (open && prefill) setMessage(prefill);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const reset = () => {
     setMessage("");

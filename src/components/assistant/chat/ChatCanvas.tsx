@@ -27,6 +27,13 @@ import {
 } from "@/lib/assistant/lead-search";
 import { addNote } from "@/stores/leads-store";
 import {
+  useMyAgenda,
+  useTeamAgendas,
+  addAgendaItem,
+  agendaStatusFor,
+  groupAgendaByUser,
+} from "@/hooks/use-daily-agenda";
+import {
   selectPriorityItems,
   selectVerifiedSalesValue,
   selectPendingSales,
@@ -89,7 +96,10 @@ export function ChatCanvas() {
   const upsertBriefing = useAssistantStore((s) => s.upsertBriefing);
   const briefingShownAt = useAssistantStore((s) => s.briefingShownAt);
   const markBriefingShown = useAssistantStore((s) => s.markBriefingShown);
-  const addTodo = useAssistantStore((s) => s.addTodo);
+
+  // Daily agenda — consultant's own plan / manager's team view (for briefing).
+  const { data: myAgenda = [], isLoading: myAgendaLoading } = useMyAgenda();
+  const { data: teamAgenda = [] } = useTeamAgendas(undefined, isManager);
 
   const [thinking, setThinking] = useState(false);
   const [popover, setPopover] = useState<{
@@ -134,7 +144,7 @@ export function ChatCanvas() {
   // re-fire can never stack duplicate greetings in the saved thread. All other
   // AI output only ever happens in response to the user (send()).
   useEffect(() => {
-    if (!profile || dbLoading) return;
+    if (!profile || dbLoading || myAgendaLoading) return;
     const last = briefingShownAt[profile.id];
     if (last && new Date(last).toDateString() === new Date().toDateString()) return;
 
@@ -164,6 +174,13 @@ export function ChatCanvas() {
     ).length;
     const reversions = pendingReversions;
 
+    // Agenda nudges — consultant: is today planned; manager: who hasn't planned.
+    const agendaPlanned = agendaStatusFor(myAgenda) !== "not_planned";
+    const plannedUserIds = new Set(Object.keys(groupAgendaByUser(teamAgenda)));
+    const unplannedConsultants = db.profiles.filter(
+      (p) => p.is_active && p.role === "property_consultant" && !plannedUserIds.has(p.id),
+    ).length;
+
     const text = buildBriefing({
       name: profile.display_name.split(" ")[0],
       role,
@@ -175,6 +192,8 @@ export function ChatCanvas() {
       idleConsultants,
       reversions,
       teamGoalPct: Math.min(teamGoalPct, 999),
+      agendaPlanned,
+      unplannedConsultants,
     });
     upsertBriefing(profile.id, {
       id: uid(),
@@ -185,7 +204,7 @@ export function ChatCanvas() {
     });
     markBriefingShown(profile.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id, dbLoading]);
+  }, [profile?.id, dbLoading, myAgendaLoading]);
 
   const send = async (text: string) => {
     if (!profile || !text.trim()) return;
@@ -304,13 +323,26 @@ export function ChatCanvas() {
           break;
         }
         replyText = intent.text || " ";
+        // Live progress line on the agenda widget ("did I finish my agenda?").
+        if (intent.widgetKey === "agenda" && myAgenda.length > 0) {
+          const done = myAgenda.filter((i) => i.done).length;
+          replyText +=
+            done === myAgenda.length
+              ? ` 🎉 All ${myAgenda.length} item(s) done — agenda complete!`
+              : ` You're at ${done}/${myAgenda.length} items done.`;
+        }
         widget = { kind: "panel", panelKey: intent.widgetKey };
         break;
       }
-      case "command_todo":
-        addTodo(profile.id, intent.text);
-        replyText = `✅ Added to your todo list: "${intent.text}".`;
+      case "command_todo": {
+        // Writes to daily_agenda_items (today, Manila) — visible on the
+        // dashboard card and to managers, unlike the old localStorage todos.
+        const r = await addAgendaItem(profile.id, intent.text);
+        replyText = r.ok
+          ? `✅ Added to today's agenda: "${intent.text}".`
+          : `⚠️ Couldn't add to your agenda — ${r.error ?? "please try again"}.`;
         break;
+      }
       case "command_call": {
         const lead = authorizedLeads.find((l) => l.id === intent.leadId);
         if (!lead?.contact_number) {

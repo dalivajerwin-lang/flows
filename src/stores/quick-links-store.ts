@@ -8,8 +8,15 @@ import { persist } from "zustand/middleware";
  * so stale/unknown IDs are silently dropped on render.
  */
 
-export const CONSULTANT_DEFAULT_SHORTCUTS = ["add", "crf", "schedule", "sellers"];
-export const MANAGER_DEFAULT_SHORTCUTS = ["add", "broadcast", "reassign", "export", "sellers"];
+export const CONSULTANT_DEFAULT_SHORTCUTS = ["add", "agenda", "crf", "schedule", "sellers"];
+export const MANAGER_DEFAULT_SHORTCUTS = [
+  "add",
+  "team-agenda",
+  "broadcast",
+  "reassign",
+  "export",
+  "sellers",
+];
 
 interface QuickLinksState {
   /** userId -> ordered shortcut ids; absent key = role defaults */

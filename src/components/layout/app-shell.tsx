@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { useNotifications, useRealtimeNotifications } from "@/hooks/use-notifications";
 import { useRealtimeBroadcasts, useRealtimeAcknowledgments } from "@/hooks/use-broadcasts";
+import { useRealtimeAgenda, migrateLegacyTodos } from "@/hooks/use-daily-agenda";
 import { useSettings } from "@/stores/settings-store";
 import { useSystemSettings } from "@/hooks/use-registration-tokens";
 import { needsOnboarding } from "@/lib/onboarding-config";
@@ -67,7 +68,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   useRealtimeNotifications(userId ?? null);
   useRealtimeBroadcasts();
   useRealtimeAcknowledgments(userId ?? null);
+  useRealtimeAgenda(!!userId);
   // ───────────────────────────────────────────────────────────────────────
+
+  // One-time: move legacy localStorage todos into today's DB agenda.
+  useEffect(() => {
+    if (userId) migrateLegacyTodos(userId);
+  }, [userId]);
 
   useEffect(() => {
     setMounted(true);

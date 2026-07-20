@@ -736,6 +736,50 @@ export interface Database {
           },
         ];
       };
+      daily_agenda_items: {
+        Row: {
+          id: string;
+          user_id: string;
+          agenda_date: string;
+          text: string;
+          done: boolean;
+          done_at: string | null;
+          position: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          agenda_date: string;
+          text: string;
+          done?: boolean;
+          done_at?: string | null;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          agenda_date?: string;
+          text?: string;
+          done?: boolean;
+          done_at?: string | null;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "daily_agenda_items_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedSchema: "public";
+          },
+        ];
+      };
       team_goals: {
         Row: {
           id: string;

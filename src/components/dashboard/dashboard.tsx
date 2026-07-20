@@ -33,6 +33,7 @@ import {
   BarChart3,
   Users,
   UserCircle2,
+  ListTodo,
 } from "lucide-react";
 import { useCurrentProfile } from "@/stores/auth-store";
 import {
@@ -114,6 +115,8 @@ import {
 import { PeriodPicker } from "@/components/reports/period-picker";
 import { type Period, monthPeriod, prevPeriod, currentMonthKey } from "@/lib/reports/time-filter";
 import { ConsultantProfileDialog } from "@/components/team/consultant-profile-dialog";
+import { DailyAgendaCard } from "@/components/agenda/daily-agenda-card";
+import { TeamAgendaOverview } from "@/components/agenda/team-agenda-overview";
 
 import { cn } from "@/lib/utils";
 
@@ -295,6 +298,17 @@ export default function Dashboard() {
         </Rise>
       )}
 
+      {/* Daily Agenda Planner — consultant card / manager one-screen overview */}
+      {isManager ? (
+        <Rise order={1}>
+          <TeamAgendaOverview viewAllLink />
+        </Rise>
+      ) : (
+        <Rise order={0}>
+          <DailyAgendaCard />
+        </Rise>
+      )}
+
       <Rise order={1}>
         <HeroSummary scope={scope} isManager={isManager} userId={profile.id} period={period} />
       </Rise>
@@ -440,11 +454,20 @@ const SHORTCUT_ICONS: Record<string, React.ReactNode> = {
   reports: <BarChart3 size={20} />,
   team: <Users size={20} />,
   profile: <UserCircle2 size={20} />,
+  agenda: <ListTodo size={20} />,
+  "team-agenda": <ListTodo size={20} />,
 };
 
 function shortcutCatalog(isManager: boolean): ShortcutDef[] {
   const all: ShortcutDef[] = [
     { id: "add", label: isManager ? "Add & Assign" : "Add Client", icon: SHORTCUT_ICONS.add },
+    { id: "agenda", label: "My Agenda", icon: SHORTCUT_ICONS.agenda, consultantOnly: true },
+    {
+      id: "team-agenda",
+      label: "Team Agenda",
+      icon: SHORTCUT_ICONS["team-agenda"],
+      managerOnly: true,
+    },
     { id: "crf", label: "CRF Link", icon: SHORTCUT_ICONS.crf },
     { id: "schedule", label: "Schedule", icon: SHORTCUT_ICONS.schedule },
     { id: "sellers", label: "Sellers", icon: SHORTCUT_ICONS.sellers },
@@ -491,6 +514,10 @@ function QuickActions({
     switch (id) {
       case "add":
         return handlers.openAdd;
+      case "agenda":
+        return () => navigate({ to: "/assistant", search: { panel: "agenda" } });
+      case "team-agenda":
+        return () => navigate({ to: "/team-agenda" });
       case "crf":
         return handlers.copyCrf;
       case "schedule":

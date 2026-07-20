@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkflowRouteImport } from './routes/workflow'
+import { Route as TeamAgendaRouteImport } from './routes/team-agenda'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as StyleguideRouteImport } from './routes/styleguide'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -34,6 +35,11 @@ import { Route as AdminAuditRouteImport } from './routes/admin/audit'
 const WorkflowRoute = WorkflowRouteImport.update({
   id: '/workflow',
   path: '/workflow',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamAgendaRoute = TeamAgendaRouteImport.update({
+  id: '/team-agenda',
+  path: '/team-agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeamRoute = TeamRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/styleguide': typeof StyleguideRoute
   '/team': typeof TeamRoute
+  '/team-agenda': typeof TeamAgendaRoute
   '/workflow': typeof WorkflowRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/tools': typeof AdminToolsRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/styleguide': typeof StyleguideRoute
   '/team': typeof TeamRoute
+  '/team-agenda': typeof TeamAgendaRoute
   '/workflow': typeof WorkflowRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/tools': typeof AdminToolsRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/styleguide': typeof StyleguideRoute
   '/team': typeof TeamRoute
+  '/team-agenda': typeof TeamAgendaRoute
   '/workflow': typeof WorkflowRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/tools': typeof AdminToolsRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/styleguide'
     | '/team'
+    | '/team-agenda'
     | '/workflow'
     | '/admin/audit'
     | '/admin/tools'
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/styleguide'
     | '/team'
+    | '/team-agenda'
     | '/workflow'
     | '/admin/audit'
     | '/admin/tools'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/styleguide'
     | '/team'
+    | '/team-agenda'
     | '/workflow'
     | '/admin/audit'
     | '/admin/tools'
@@ -294,6 +306,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StyleguideRoute: typeof StyleguideRoute
   TeamRoute: typeof TeamRoute
+  TeamAgendaRoute: typeof TeamAgendaRoute
   WorkflowRoute: typeof WorkflowRoute
 }
 
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/workflow'
       fullPath: '/workflow'
       preLoaderRoute: typeof WorkflowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team-agenda': {
+      id: '/team-agenda'
+      path: '/team-agenda'
+      fullPath: '/team-agenda'
+      preLoaderRoute: typeof TeamAgendaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/team': {
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StyleguideRoute: StyleguideRoute,
   TeamRoute: TeamRoute,
+  TeamAgendaRoute: TeamAgendaRoute,
   WorkflowRoute: WorkflowRoute,
 }
 export const routeTree = rootRouteImport
