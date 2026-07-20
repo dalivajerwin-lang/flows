@@ -5,6 +5,7 @@ import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { db } from "@/lib/supabase";
 import { uploadAvatarImage } from "@/lib/storage-helper";
 import { Field, TenaciousInput } from "@/components/ui/form-controls";
+import { GenericAvatarPicker } from "@/components/profile/generic-avatar-picker";
 import { initials } from "@/lib/format";
 import { useOnboarding } from "@/stores/onboarding-store";
 import { announceBadge } from "./onboarding-bits";
@@ -110,6 +111,16 @@ export function StepProfile({
       <p className="mt-2 text-center text-xs text-[var(--color-text-secondary)]">
         {profile.profile_photo_url ? "Looking sharp." : "Tap to add your photo"}
       </p>
+
+      {/* Photo is optional — offer the bundled generic avatars as a fallback. */}
+      <div className="mt-4">
+        <GenericAvatarPicker
+          onSelected={() => {
+            setJustUploaded(true);
+            if (awardBadge("face_forward")) announceBadge("face_forward");
+          }}
+        />
+      </div>
 
       <div className="mt-6 space-y-4">
         {isConsultant && (

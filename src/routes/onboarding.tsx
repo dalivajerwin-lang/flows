@@ -149,7 +149,9 @@ function OnboardingPage() {
         {step.id === "pipeline_tour" && (
           <StepPipelineTour onReachedEnd={() => setStepReady(true)} />
         )}
-        {step.id === "first_lead" && <StepFirstLead onLeadAdded={() => setStepReady(true)} />}
+        {step.id === "first_lead" && (
+          <StepFirstLead onLeadAdded={() => setStepReady(true)} onSkip={handleSkipStep} />
+        )}
         {step.id === "daily_tools" && (
           <StepToolsCarousel
             title="Your daily toolkit"

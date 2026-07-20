@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { useNotifications, useRealtimeNotifications } from "@/hooks/use-notifications";
 import { useRealtimeBroadcasts, useRealtimeAcknowledgments } from "@/hooks/use-broadcasts";
+import { useRealtimeAgenda, migrateLegacyTodos } from "@/hooks/use-daily-agenda";
 import { useSettings } from "@/stores/settings-store";
 import { useSystemSettings } from "@/hooks/use-registration-tokens";
 import { needsOnboarding } from "@/lib/onboarding-config";
@@ -67,7 +68,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   useRealtimeNotifications(userId ?? null);
   useRealtimeBroadcasts();
   useRealtimeAcknowledgments(userId ?? null);
+  useRealtimeAgenda(!!userId);
   // ───────────────────────────────────────────────────────────────────────
+
+  // One-time: move legacy localStorage todos into today's DB agenda.
+  useEffect(() => {
+    if (userId) migrateLegacyTodos(userId);
+  }, [userId]);
 
   useEffect(() => {
     setMounted(true);
@@ -129,10 +136,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [hydrated, profile, path, navigate]);
 
-  // First-run onboarding trigger (§2.1): once hydrated, an account that never
-  // started (onboarding null) or exited without finishing-or-skipping is sent
-  // to the chrome-less flow. Gated by the system_settings rollout flag; also
-  // powers cross-device resume — state lives in the DB, not localStorage.
+  // First-run onboarding trigger (§2.1): once hydrated, an account that has
+  // never started onboarding is sent to the chrome-less flow — exactly once.
+  // Abandoned/unfinished runs come back via the dashboard resume banner, never
+  // by hijacking login again. Gated by the system_settings rollout flag; state
+  // lives in the DB, not localStorage, so this also works cross-device.
   const { data: systemSettings } = useSystemSettings();
   useEffect(() => {
     if (!hydrated || !profile || isPublic || path === "/onboarding") return;

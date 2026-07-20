@@ -24,6 +24,7 @@ import { requireAuth } from "@/lib/route-guards";
 import { initials } from "@/lib/format";
 import { parseOnboarding, BADGES } from "@/lib/onboarding-config";
 import { BadgeCircle } from "@/components/onboarding/onboarding-bits";
+import { GenericAvatarPicker } from "@/components/profile/generic-avatar-picker";
 
 export const Route = createFileRoute("/profile")({
   beforeLoad: requireAuth,
@@ -162,6 +163,12 @@ function ProfilePage() {
             <CardDescription className="text-sm font-medium text-[var(--color-text-secondary)]">
               {roleLabels[profile.role] || profile.role}
             </CardDescription>
+            {/* Uploading a photo is optional — generic avatars as a fallback. */}
+            <div className="mt-3 w-full">
+              <GenericAvatarPicker
+                onSelected={() => toast.success("Avatar updated successfully.")}
+              />
+            </div>
             <ProfileBadgeRow onboarding={(profile as { onboarding?: unknown }).onboarding} />
           </CardHeader>
           <CardContent className="border-t border-[var(--color-border)] pt-4 space-y-3 text-sm">

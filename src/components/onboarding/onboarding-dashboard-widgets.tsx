@@ -10,6 +10,7 @@ import {
   parseOnboarding,
   progressPercent,
   remainingSteps,
+  type FirstDayItem,
   type OnboardingState,
 } from "@/lib/onboarding-config";
 import { CheckDraw } from "./onboarding-bits";
@@ -95,17 +96,21 @@ export function FirstDayChecklist() {
   if (!profile || profile.role === "superadmin") return null;
   const state = parseOnboarding((profile as { onboarding?: unknown }).onboarding);
   if (!state || state.completedAt == null || state.firstDayDismissed) return null;
-  const items = firstDayItemsFor(state.role);
+  // "Add your CRF link" only applies when it wasn't already set (e.g. during
+  // onboarding's profile step) — consultants who added it skip straight past.
+  const items = firstDayItemsFor(state.role).filter(
+    (i) => i.id !== "add_crf_link" || !profile.crf_link,
+  );
   const done = state.firstDay ?? {};
   if (items.every((i) => done[i.id])) return null;
 
-  const tick = (id: string, to: string) => {
-    const nextDone = { ...done, [id]: true };
+  const tick = (item: FirstDayItem) => {
+    const nextDone = { ...done, [item.id]: true };
     persistOnboarding(profile, { ...state, firstDay: nextDone });
     if (items.every((i) => nextDone[i.id])) {
       toast("Day one: done. See you tomorrow.");
     }
-    navigate({ to });
+    navigate({ to: item.to, search: item.search });
   };
 
   return (
@@ -128,7 +133,7 @@ export function FirstDayChecklist() {
             <li key={item.id}>
               <button
                 type="button"
-                onClick={() => !isDone && tick(item.id, item.to)}
+                onClick={() => !isDone && tick(item)}
                 disabled={isDone}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-(--radius-sm) p-2 text-left text-sm transition-tenacious",

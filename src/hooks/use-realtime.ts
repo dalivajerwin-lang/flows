@@ -55,3 +55,42 @@ export function useRealtimeTable(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table, filter, enabled]);
 }
+
+/**
+ * Like useRealtimeTable but fires on INSERT, UPDATE and DELETE. Use for
+ * tables where row edits matter (e.g. daily_agenda_items check-offs).
+ */
+export function useRealtimeTableAllEvents(
+  table: string,
+  filter: string | undefined,
+  onChange: (payload: RealtimePayload) => void,
+  enabled = true,
+) {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const channelName = filter ? `rt*:${table}:${filter}` : `rt*:${table}:all`;
+
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        "postgres_changes" as any,
+        {
+          event: "*",
+          schema: "public",
+          table,
+          ...(filter ? { filter } : {}),
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => onChange(payload as RealtimePayload),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // onChange is intentionally excluded — callers should memoize if needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, filter, enabled]);
+}

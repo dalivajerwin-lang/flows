@@ -16,6 +16,7 @@ import {
   UsersRound,
   Building,
   ShieldCheck,
+  ListTodo,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -31,6 +32,7 @@ interface Action {
 
 const consultantActions: Action[] = [
   { label: "Add a Client", icon: UserPlus, handler: "add_lead" },
+  { label: "My Agenda", icon: ListTodo },
   { label: "Projects Computation", icon: Calculator },
   { label: "CRF Link", icon: LinkIcon },
   { label: "Schedule", icon: CalendarPlus, handler: "schedule" },
@@ -42,6 +44,7 @@ const consultantActions: Action[] = [
 
 const managerActions: Action[] = [
   { label: "Add & Assign Client", icon: UserPlus, handler: "add_lead" },
+  { label: "Team Agenda", icon: ListTodo },
   { label: "Projects", icon: Building },
   { label: "Projects Computation", icon: Calculator },
   { label: "CRF Link", icon: LinkIcon },
@@ -89,6 +92,10 @@ export function FabMenu({
                   setTimeout(() => setAddOpen(true), 50);
                 } else if (action.handler === "schedule") {
                   navigate({ to: "/schedule" });
+                } else if (action.label === "My Agenda") {
+                  navigate({ to: "/assistant", search: { panel: "agenda" } });
+                } else if (action.label === "Team Agenda") {
+                  navigate({ to: "/team-agenda" });
                 } else if (action.label === "Projects Computation") {
                   navigate({ to: "/projects" });
                 } else if (action.label === "Projects") {

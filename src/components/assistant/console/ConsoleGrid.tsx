@@ -12,6 +12,7 @@ import { LinksLibraryAdminPanel } from "./panels/LinksLibraryAdminPanel";
 import { ProjectAdminPanel } from "./panels/ProjectAdminPanel";
 import { ReversionInboxPanel } from "./panels/ReversionInboxPanel";
 import { TopPerformerPanel } from "./panels/TopPerformerPanel";
+import { TeamAgendaPanel } from "./panels/TeamAgendaPanel";
 
 export function ConsoleGrid({
   role,
@@ -28,6 +29,7 @@ export function ConsoleGrid({
     <div className={cn(className)}>
       {isManager ? (
         <>
+          <TeamAgendaPanel />
           <TeamGuardPanel />
           <BottleneckPanel />
           <GoalPaceCalculatorPanel />

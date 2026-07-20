@@ -67,9 +67,10 @@ function LoginPage() {
         setError(result.error);
         return;
       }
-      // First-run onboarding (§2.1): never started, or started but neither
-      // finished nor exited → the flow, gated by the rollout flag (§12.4).
-      // The superadmin never onboards — they administer the workspace.
+      // First-run onboarding (§2.1): only accounts that never started the
+      // flow get redirected — an unfinished run resumes via the dashboard
+      // banner instead of hijacking every login. Gated by the rollout flag
+      // (§12.4). The superadmin never onboards — they administer the workspace.
       if (
         result.profile.role !== "superadmin" &&
         needsOnboarding((result.profile as { onboarding?: unknown }).onboarding)

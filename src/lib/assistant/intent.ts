@@ -13,7 +13,7 @@ export type IntentResult =
   | { kind: "widget"; widgetKey: string; text: string };
 
 const consultantMap: Array<[RegExp, string, string]> = [
-  [/\b(agenda|today|schedule)\b/i, "agenda", "Here is today's agenda."],
+  [/\b(agenda|today|schedule|plan my day)\b/i, "agenda", "Here is today's agenda."],
   [/\b(expir|warning|deadline)\b/i, "expiry", "Live expiry warnings for your leads:"],
   [/\b(stagnant|inactive)\b/i, "stagnant", "These leads haven't been touched in 7+ days:"],
   [/\b(goal|target|progress)\b/i, "goal", "Here is your personal goal tracker."],
@@ -33,6 +33,11 @@ const consultantMap: Array<[RegExp, string, string]> = [
 ];
 
 const managerMap: Array<[RegExp, string, string]> = [
+  [
+    /\b(team agenda|agenda status|who.*planned)\b/i,
+    "team_agenda",
+    "Team agenda status for today:",
+  ],
   [/\b(idle|team guard|consultants)\b/i, "team_guard", "Team Guard: consultants inactive > 72h."],
   [/\b(bottleneck|documentation|lag)\b/i, "bottleneck", "Documentation bottleneck alerts:"],
   [/\b(goal|pace|projection)\b/i, "goal_pace", "Team goal pace calculator:"],
@@ -65,8 +70,8 @@ export function parseIntent(
     const m = raw.match(/^broadcast\s+(.+)$/i);
     if (m) return { kind: "command_broadcast", message: m[1].trim() };
   }
-  // todo
-  const todo = raw.match(/^\/?todo\s+(.+)$/i);
+  // todo / add to agenda — both write to today's daily agenda
+  const todo = raw.match(/^\/?todo\s+(.+)$/i) ?? raw.match(/^(?:\/)?add\s+to\s+agenda\s+(.+)$/i);
   if (todo) return { kind: "command_todo", text: todo[1].trim() };
 
   // add note to X: text
@@ -132,6 +137,7 @@ export function suggestionChips(role: "manager" | "superadmin" | "property_consu
         "Team links",
       ]
     : [
+        "Team agenda status",
         "Any idle consultants?",
         "Show documentation bottlenecks",
         "Team goal pace",
@@ -153,12 +159,23 @@ export function buildBriefing(params: {
   idleConsultants: number;
   reversions: number;
   teamGoalPct: number;
+  /** Consultant: is today's agenda planned? Manager: how many haven't planned. */
+  agendaPlanned?: boolean;
+  unplannedConsultants?: number;
 }): string {
   const g = greetingWord();
   if (params.role === "property_consultant") {
-    return `${g}, ${params.name}! Today you have ${params.trippings} trippings scheduled, ${params.expiring} expiring reservations, and ${params.stagnant} stagnant leads. You are at ${params.goalPct}% of your monthly sales target. Let's get to work!`;
+    const agendaNudge =
+      params.agendaPlanned === false
+        ? " You haven't planned today's agenda yet — say `plan my day` to start."
+        : "";
+    return `${g}, ${params.name}! Today you have ${params.trippings} trippings scheduled, ${params.expiring} expiring reservations, and ${params.stagnant} stagnant leads. You are at ${params.goalPct}% of your monthly sales target.${agendaNudge} Let's get to work!`;
   }
-  return `${g}, Manager ${params.name}! Today the team has ${params.pendingSales} closed sales pending verification, ${params.idleConsultants} idle consultants, and ${params.reversions} active reversion requests. The monthly team goal is at ${params.teamGoalPct}% pace. What would you like to review?`;
+  const agendaNudge =
+    params.unplannedConsultants && params.unplannedConsultants > 0
+      ? ` ${params.unplannedConsultants} consultant(s) haven't planned today's agenda.`
+      : "";
+  return `${g}, Manager ${params.name}! Today the team has ${params.pendingSales} closed sales pending verification, ${params.idleConsultants} idle consultants, and ${params.reversions} active reversion requests.${agendaNudge} The monthly team goal is at ${params.teamGoalPct}% pace. What would you like to review?`;
 }
 
 export function greetingWord(): string {
