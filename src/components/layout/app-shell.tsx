@@ -136,10 +136,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [hydrated, profile, path, navigate]);
 
-  // First-run onboarding trigger (§2.1): once hydrated, an account that never
-  // started (onboarding null) or exited without finishing-or-skipping is sent
-  // to the chrome-less flow. Gated by the system_settings rollout flag; also
-  // powers cross-device resume — state lives in the DB, not localStorage.
+  // First-run onboarding trigger (§2.1): once hydrated, an account that has
+  // never started onboarding is sent to the chrome-less flow — exactly once.
+  // Abandoned/unfinished runs come back via the dashboard resume banner, never
+  // by hijacking login again. Gated by the system_settings rollout flag; state
+  // lives in the DB, not localStorage, so this also works cross-device.
   const { data: systemSettings } = useSystemSettings();
   useEffect(() => {
     if (!hydrated || !profile || isPublic || path === "/onboarding") return;

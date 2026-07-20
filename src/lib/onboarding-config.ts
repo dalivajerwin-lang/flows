@@ -139,18 +139,18 @@ export function parseOnboarding(raw: unknown): OnboardingState | null {
   return o;
 }
 
-/** True when the flow should trigger on login: never started, or started but neither finished nor exited. */
+/** True when the flow should auto-trigger on login: never started at all.
+ * A started-but-abandoned flow must NOT re-hijack every login — the dashboard
+ * resume banner (isOnboardingIncomplete) is the way back in. */
 export function needsOnboarding(raw: unknown): boolean {
-  const o = parseOnboarding(raw);
-  if (!o) return true;
-  return o.completedAt == null && o.skippedAt == null;
+  return parseOnboarding(raw) == null;
 }
 
-/** True when the dashboard resume banner should show: exited early with steps left. */
+/** True when the dashboard resume banner should show: started but unfinished. */
 export function isOnboardingIncomplete(raw: unknown): boolean {
   const o = parseOnboarding(raw);
   if (!o) return false;
-  return o.completedAt == null && o.skippedAt != null && !o.resumeBannerDismissed;
+  return o.completedAt == null && !o.resumeBannerDismissed;
 }
 
 /** Index of the first step that is neither done nor skipped (resume point, §7). */
@@ -186,12 +186,19 @@ export interface FirstDayItem {
   label: string;
   /** In-app destination for the item's action. */
   to: string;
+  /** Optional search params for the destination (e.g. assistant panel deep-link). */
+  search?: Record<string, string>;
 }
 
 export const CONSULTANT_FIRST_DAY: FirstDayItem[] = [
-  { id: "schedule_first", label: "Schedule your first tripping or presentation", to: "/schedule" },
-  { id: "set_followup", label: "Set a follow-up reminder on your lead", to: "/leads" },
-  { id: "try_assistant", label: "Explore the Assistant with one prompt", to: "/assistant" },
+  { id: "add_crf_link", label: "Add your CRF link", to: "/profile" },
+  { id: "view_schedule", label: "View your schedule", to: "/schedule" },
+  {
+    id: "add_daily_agenda",
+    label: "Add a daily agenda",
+    to: "/assistant",
+    search: { panel: "agenda" },
+  },
 ];
 
 export const MANAGER_FIRST_DAY: FirstDayItem[] = [

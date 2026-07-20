@@ -13,10 +13,17 @@ import { announceBadge } from "./onboarding-bits";
 /**
  * Add your first client — C4, the activation moment. Two paths, no dead end:
  * (a) the real AddLeadDialog, unchanged; (b) a clearly-labeled practice lead.
+ * A quiet third path skips the step entirely — no lead required to proceed.
  * After save the new lead renders as a real LeadListCards card with a one-time
  * teal shimmer sweep + First Client badge (§4 C4, §9.6).
  */
-export function StepFirstLead({ onLeadAdded }: { onLeadAdded: () => void }) {
+export function StepFirstLead({
+  onLeadAdded,
+  onSkip,
+}: {
+  onLeadAdded: () => void;
+  onSkip: () => void;
+}) {
   const profile = useCurrentProfile();
   const awardBadge = useOnboarding((s) => s.awardBadge);
   const { data: leads = [], refetch } = useLeads(profile ? { assignedTo: profile.id } : undefined);
@@ -146,6 +153,15 @@ export function StepFirstLead({ onLeadAdded }: { onLeadAdded: () => void }) {
                 </div>
               </div>
             </div>
+          </button>
+
+          {/* Path (c) — quiet skip. Adding a lead is optional (§7). */}
+          <button
+            type="button"
+            onClick={onSkip}
+            className="w-full rounded-[var(--radius-sm)] p-2 text-center text-sm font-medium text-[var(--color-text-secondary)] transition-tenacious hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
+          >
+            Skip for now — I'll add leads later
           </button>
         </div>
       )}
