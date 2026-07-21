@@ -97,7 +97,7 @@ export function FirstDayChecklist() {
   const state = parseOnboarding((profile as { onboarding?: unknown }).onboarding);
   if (!state || state.completedAt == null || state.firstDayDismissed) return null;
   // "Add your CRF link" only applies when it wasn't already set (e.g. during
-  // onboarding's profile step) — consultants who added it skip straight past.
+  // onboarding's profile step) — users who added it skip straight past.
   const items = firstDayItemsFor(state.role).filter(
     (i) => i.id !== "add_crf_link" || !profile.crf_link,
   );

@@ -127,6 +127,31 @@ export function useAdminPurgeTrash() {
   });
 }
 
+export function useAdminExportBackup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await db.rpc("admin_export_backup_logged");
+      if (error) throw new Error(error.message);
+      // Download as a timestamped JSON file, same object-URL pattern as the
+      // audit-log CSV export.
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tenacious-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const d = data as { leads?: unknown[]; profiles?: unknown[] };
+      return { leads: d.leads?.length ?? 0, profiles: d.profiles?.length ?? 0 };
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["audit_trail"] }),
+  });
+}
+
 // --- admin-user-ops edge function (service-role operations) ---
 
 type UserOpAction = "revoke_sessions" | "send_reset" | "delete_user";

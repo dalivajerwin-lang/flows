@@ -48,6 +48,22 @@ If a server-side rule "isn't working" in production but the local SQL/function
 code looks correct, check deployment status first. The Supabase CLI is NOT in
 PATH on this machine — flag the push as a manual step for the user.
 
+## Environment variables
+
+Copy `.env.example` to `.env.local` and fill it in (`.env.local` is
+gitignored). The app itself needs only two, read in `src/lib/supabase.ts`:
+
+- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — from the Supabase
+  dashboard (Settings → API). `VITE_*` values are embedded in the client
+  bundle; the anon key is public by design (RLS is the boundary), but the
+  service role key must never appear in one. Netlify needs the same two vars
+  set in its build environment.
+
+Optional `A11Y_*` vars drive `scripts/a11y-audit.mjs` (see
+[accessibility.md](accessibility.md)). Edge functions get `SUPABASE_URL` /
+`SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` injected automatically by
+the Supabase runtime — nothing to configure locally.
+
 ## Verification
 
 - `npm run dev` — dev server (vite)

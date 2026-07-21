@@ -35,6 +35,10 @@ security invariant.
 - Do NOT add a public email login path — login is agent-number-only via the
   `agent-login` edge function.
 - Do NOT let an `audit_trail` failure block the underlying operation.
+- Do NOT call `admin_export_backup()` directly from the client — the full-data
+  export goes through `admin_export_backup_logged()` (migration 023) so every
+  download is audited. Both are superadmin-gated `SECURITY DEFINER` functions;
+  keep them that way.
 
 ## Design system
 

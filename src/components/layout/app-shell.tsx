@@ -5,6 +5,7 @@ import { useAuth, useCurrentProfile } from "@/stores/auth-store";
 import { useNotifications, useRealtimeNotifications } from "@/hooks/use-notifications";
 import { useRealtimeBroadcasts, useRealtimeAcknowledgments } from "@/hooks/use-broadcasts";
 import { useRealtimeAgenda, migrateLegacyTodos } from "@/hooks/use-daily-agenda";
+import { useRealtimeLeads } from "@/hooks/use-leads";
 import { useSettings } from "@/stores/settings-store";
 import { useSystemSettings } from "@/hooks/use-registration-tokens";
 import { needsOnboarding } from "@/lib/onboarding-config";
@@ -69,6 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useRealtimeBroadcasts();
   useRealtimeAcknowledgments(userId ?? null);
   useRealtimeAgenda(!!userId);
+  useRealtimeLeads(!!userId);
   // ───────────────────────────────────────────────────────────────────────
 
   // One-time: move legacy localStorage todos into today's DB agenda.

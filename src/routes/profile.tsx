@@ -100,7 +100,7 @@ function ProfilePage() {
         .from("profiles")
         .update({
           display_name: displayName.trim(),
-          crf_link: currentProfile.role === "property_consultant" ? crfLink.trim() || null : null,
+          crf_link: crfLink.trim() || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", currentProfile.id)
@@ -230,25 +230,23 @@ function ProfilePage() {
               </div>
             </div>
 
-            {profile.role === "property_consultant" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="crf-link">Customer Relations Form (CRF) Link</Label>
-                <div className="relative">
-                  <Link className="absolute left-3 top-2.5 h-4 w-4 text-[var(--color-text-placeholder)]" />
-                  <Input
-                    id="crf-link"
-                    type="url"
-                    value={crfLink}
-                    onChange={(e) => setCrfLink(e.target.value)}
-                    className="pl-9 border-[var(--color-border)] focus-visible:ring-[var(--color-primary)]"
-                    placeholder="https://docs.google.com/forms/..."
-                  />
-                </div>
-                <p className="text-xs text-[var(--color-text-secondary)]">
-                  Your clients will be directed here during the CRF workflow stage.
-                </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="crf-link">Customer Relations Form (CRF) Link</Label>
+              <div className="relative">
+                <Link className="absolute left-3 top-2.5 h-4 w-4 text-[var(--color-text-placeholder)]" />
+                <Input
+                  id="crf-link"
+                  type="url"
+                  value={crfLink}
+                  onChange={(e) => setCrfLink(e.target.value)}
+                  className="pl-9 border-[var(--color-border)] focus-visible:ring-[var(--color-primary)]"
+                  placeholder="https://docs.google.com/forms/..."
+                />
               </div>
-            )}
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                Your clients will be directed here during the CRF workflow stage.
+              </p>
+            </div>
 
             <div className="space-y-1.5">
               <Label>Personal Monthly Target</Label>
