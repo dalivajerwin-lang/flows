@@ -21,6 +21,7 @@ Where things live and how the pieces connect.
 | Team roster + invite dialog | `src/routes/team.tsx` |
 | Daily Agenda Planner (consultant card, manager overview + `/team-agenda` route) | `src/components/agenda/`, `src/hooks/use-daily-agenda.ts`, `src/routes/team-agenda.tsx` |
 | Superadmin user console (direct account creation, role changes) | `src/routes/admin/users.tsx` |
+| Superadmin tools (full-data JSON backup via `admin_export_backup_logged()` RPC, migration 023) | `src/routes/admin/tools.tsx`, `useAdminExportBackup` in `src/hooks/use-admin.ts` |
 | Invite edge-function client wrapper | `src/lib/invite-user.ts` |
 | AI assistant | `src/components/assistant/`, `src/lib/assistant/` |
 | SQL migrations (numbered, append-only) | `supabase/migrations/` |
@@ -80,7 +81,10 @@ All stage transitions go through DB RPCs (`transition_lead`,
 `deny_reversion` — migrations 002 + 007), never direct updates. Consultants
 see only their own leads; managers see all (RLS). Training/sample leads carry
 `is_sample = true` (migration 020) and are excluded from all metrics via
-`isReportableLead()` in the dashboard/report selectors.
+`isReportableLead()` in the dashboard/report selectors. The `leads` table is
+in the realtime publication (migration 022) so other sessions invalidate
+their caches on any insert/update/delete — realtime respects the RLS select
+policies, so consultants only receive events for their own rows.
 
 ## Build config
 

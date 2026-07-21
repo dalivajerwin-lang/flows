@@ -12,10 +12,10 @@ import { announceBadge } from "./onboarding-bits";
 import { cn } from "@/lib/utils";
 
 /**
- * Complete your profile — C2 / M3. Photo is the hero; (consultant-only)
- * CRF link below. Reuses the exact avatar upload affordance and profiles.update
- * pattern from profile.tsx. Fields save on Continue via saveProfileFields,
- * which the parent route calls before advancing.
+ * Complete your profile — C2 / M3. Photo is the hero; CRF link below (every
+ * role has their own CRF form). Reuses the exact avatar upload affordance and
+ * profiles.update pattern from profile.tsx. Fields save on Continue via
+ * saveProfileFields, which the parent route calls before advancing.
  */
 export function StepProfile({
   crfLink,
@@ -123,36 +123,32 @@ export function StepProfile({
       </div>
 
       <div className="mt-6 space-y-4">
-        {isConsultant && (
-          <Field
-            label="CRF Link (optional — you can add this later)"
-            htmlFor="onb-crf"
-            helper="Your clients will be directed here during the CRF workflow stage."
-          >
-            <div className="relative">
-              <Link className="absolute left-3 top-3.5 h-4 w-4 text-[var(--color-text-placeholder)]" />
-              <TenaciousInput
-                id="onb-crf"
-                type="url"
-                value={crfLink}
-                onChange={(e) => setCrfLink(e.target.value)}
-                placeholder="https://docs.google.com/forms/..."
-                className="pl-9"
-              />
-            </div>
-          </Field>
-        )}
+        <Field
+          label="CRF Link (optional — you can add this later)"
+          htmlFor="onb-crf"
+          helper="Your clients will be directed here during the CRF workflow stage."
+        >
+          <div className="relative">
+            <Link className="absolute left-3 top-3.5 h-4 w-4 text-[var(--color-text-placeholder)]" />
+            <TenaciousInput
+              id="onb-crf"
+              type="url"
+              value={crfLink}
+              onChange={(e) => setCrfLink(e.target.value)}
+              placeholder="https://docs.google.com/forms/..."
+              className="pl-9"
+            />
+          </div>
+        </Field>
       </div>
     </div>
   );
 }
 
-/** Persist CRF (consultants) on Continue — same call profile.tsx uses. */
+/** Persist CRF on Continue — same call profile.tsx uses. */
 export async function saveProfileFields(crfLink: string): Promise<void> {
   const profile = useAuth.getState().profile;
   if (!profile) return;
-  // Managers have nothing to persist on this step (photo saves on upload).
-  if (profile.role !== "property_consultant") return;
   const { data: updatedProfile, error } = await db
     .from("profiles")
     .update({

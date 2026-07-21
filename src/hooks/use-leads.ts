@@ -9,8 +9,10 @@
  * useRestoreLead  — clear deleted_at
  * useTrashedLeads — fetch leads where deleted_at is not null (manager-only)
  */
+import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/lib/supabase";
+import { useRealtimeTableAllEvents } from "@/hooks/use-realtime";
 import type { Database } from "@/types/supabase";
 
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -72,6 +74,29 @@ export function useTrashedLeads() {
       return data as Lead[];
     },
   });
+}
+
+// ─── Realtime: cross-client leads sync ───────────────────────────────────────
+/**
+ * Invalidates lead queries on any leads-table change made by ANOTHER session
+ * (trash/restore/purge from admin, reassignment, stage moves…). Without this,
+ * a manager kept seeing a lead the admin had already deleted until a full
+ * reload — mutations only invalidate the acting user's own cache.
+ * Mount once (AppShell). Requires the leads table in the supabase_realtime
+ * publication (migration 022); RLS still scopes which rows each user receives.
+ */
+export function useRealtimeLeads(enabled = true) {
+  const qc = useQueryClient();
+  const onChange = useCallback(
+    (payload: { eventType: string; new: Record<string, unknown> }) => {
+      // Prefix match covers ["leads", filters], ["leads", "trashed"], ["leads", "deleted"].
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      const id = (payload.new as { id?: string })?.id;
+      if (id) qc.invalidateQueries({ queryKey: ["lead", id] });
+    },
+    [qc],
+  );
+  useRealtimeTableAllEvents("leads", undefined, onChange, enabled);
 }
 
 // ─── Mutation: add lead ───────────────────────────────────────────────────────

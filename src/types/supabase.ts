@@ -968,6 +968,14 @@ export interface Database {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      admin_export_backup: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_export_backup_logged: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;

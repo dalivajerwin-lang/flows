@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/stores/auth-store";
 import { useAllProfiles } from "@/hooks/use-profiles";
 import {
+  useAdminExportBackup,
   useAdminForceStage,
   useAdminPurgeTrash,
   useAdminReassignLeads,
@@ -31,7 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArchiveRestore, ArrowRightLeft, Inbox, Trash2, Wrench } from "lucide-react";
+import { ArchiveRestore, ArrowRightLeft, DatabaseBackup, Inbox, Trash2, Wrench } from "lucide-react";
 
 export const Route = createFileRoute("/admin/tools")({
   head: () => ({ meta: [{ title: "Intervention Tools — Tenacious CRM" }] }),
@@ -59,11 +60,12 @@ function AdminToolsPage() {
       </div>
 
       <Tabs defaultValue="reassign" className="w-full">
-        <TabsList className="grid w-full max-w-[600px] grid-cols-4">
+        <TabsList className="grid w-full max-w-[720px] grid-cols-5">
           <TabsTrigger value="reassign">Reassign</TabsTrigger>
           <TabsTrigger value="stage">Force Stage</TabsTrigger>
           <TabsTrigger value="trash">Deleted Leads</TabsTrigger>
           <TabsTrigger value="approvals">Approvals</TabsTrigger>
+          <TabsTrigger value="backup">Backup</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reassign" className="mt-4">
@@ -77,6 +79,9 @@ function AdminToolsPage() {
         </TabsContent>
         <TabsContent value="approvals" className="mt-4">
           <ApprovalsPanel />
+        </TabsContent>
+        <TabsContent value="backup" className="mt-4">
+          <BackupPanel />
         </TabsContent>
       </Tabs>
     </div>
@@ -403,6 +408,47 @@ function DeletedLeadsPanel() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// ── Backup ──────────────────────────────────────────────────────────────
+
+function BackupPanel() {
+  const exportBackup = useAdminExportBackup();
+
+  const handleExport = async () => {
+    try {
+      const { leads, profiles } = await exportBackup.mutateAsync();
+      toast.success(`Backup downloaded — ${leads} lead(s), ${profiles} profile(s).`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Backup export failed.");
+    }
+  };
+
+  return (
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
+      <div className="flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">
+          <DatabaseBackup className="h-5 w-5" />
+        </span>
+        <div>
+          <div className="font-semibold text-[var(--color-text)]">Full data backup</div>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+            Downloads every table — leads, notes, buyers, profiles, projects, appointments,
+            approvals, broadcasts, agendas, goals, settings, tokens, and the complete audit trail —
+            as one timestamped JSON file. Includes trashed leads. The download itself is written to
+            the audit log.
+          </p>
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+            The file contains client contact details — store it somewhere private, not a shared
+            drive.
+          </p>
+          <Button className="mt-4" disabled={exportBackup.isPending} onClick={handleExport}>
+            {exportBackup.isPending ? "Preparing backup..." : "Download backup"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
